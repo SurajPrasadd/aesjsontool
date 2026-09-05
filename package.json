@@ -7,10 +7,15 @@
   "engines": {
     "vscode": "^1.136.0"
   },
+  "repository":{
+    "type": "git",
+    "url": "https://github.com/SurajPrasadd/aesjsontool.git"
+  },
   "categories": [
     "Other",
     "Formatters"
   ],
+  "icon":"icon.ico",
   "keywords": [
     "aes",
     "encrypt",
