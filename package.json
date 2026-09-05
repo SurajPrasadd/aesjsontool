@@ -1,0 +1,66 @@
+{
+  "name": "aesjsontool",
+  "displayName": "AES JSON Tool",
+  "description": "AES-128/192/256 encrypt & decrypt (ECB/CBC/CTR/CFB/OFB/GCM) plus a JSON & XML validator, beautifier, tree viewer, and side-by-side diff — all inside a VS Code webview panel.",
+  "version": "0.0.1",
+  "publisher": "SurajPrasad1993",
+  "engines": {
+    "vscode": "^1.136.0"
+  },
+  "categories": [
+    "Other",
+    "Formatters"
+  ],
+  "keywords": [
+    "aes",
+    "encrypt",
+    "decrypt",
+    "cryptography",
+    "json",
+    "xml",
+    "diff",
+    "beautify"
+  ],
+  "activationEvents": [
+    "onCommand:aesjsontool.open"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "aesjsontool.open",
+        "title": "Open AES & JSON/XML Workbench",
+        "category": "AesJsonTool"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "aesjsontool.open"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.136.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "24.x",
+    "typescript-eslint": "^8.61.1",
+    "eslint": "^10.5.0",
+    "typescript": "^6.0.3",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.0.0"
+  },
+  "overrides": {
+    "diff": "^8.0.4",
+    "serialize-javascript": "^7.0.6"
+  }
+}
