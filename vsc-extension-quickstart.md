@@ -1,8 +1,10 @@
-# Welcome to your VS Code Extension
+# AES JSON Tool
+
+AES Encryption/Decryption and JSON/XML Formatter for Visual Studio Code.
 
 ## 🛠️ Project Setup
 
-### 1. Create the project
+### 1. Create the Project
 
 ```bash
 mkdir aesjson
@@ -16,7 +18,9 @@ npm init -y
 npm install -g yo generator-code
 ```
 
-### 3. Generate the extension
+### 3. Generate the Extension
+
+Run:
 
 ```bash
 yo code
@@ -37,21 +41,44 @@ Description: AES Encryption/Decryption and JSON/XML Formatter
 Package Manager: npm
 ```
 
-### 4. Install dependencies
+### 4. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 5. Compile the extension
+Install VSCE for generating the `.vsix` package:
+
+```bash
+npm install --save-dev @vscode/vsce
+```
+
+Or install it globally:
+
+```bash
+npm install -g @vscode/vsce
+```
+
+Verify:
+
+```bash
+vsce --version
+```
+
+### 5. Compile the Extension
 
 ```bash
 npm run compile
 ```
 
-After successful compilation, the `out` folder will be generated.
+After successful compilation, the `out` folder will be generated:
 
-### 6. Run the extension
+```text
+out/
+└── extension.js
+```
+
+### 6. Run the Extension
 
 Open the project in VS Code:
 
@@ -67,7 +94,7 @@ F5
 
 A new **Extension Development Host** window will open.
 
-Then press:
+Open the Command Palette:
 
 ```text
 Ctrl + Shift + P
@@ -76,7 +103,61 @@ Ctrl + Shift + P
 Search for:
 
 ```text
-AES JSON Tool: Open
+CipherDeck: Open AES & JSON/XML Workbench
+```
+
+The AES JSON Tool will open in a new tab.
+
+> Every time `CipherDeck: Open AES & JSON/XML Workbench` is executed, a new tool tab is created.
+
+## 📦 Generate VSIX
+
+Compile the extension first:
+
+```bash
+npm run compile
+```
+
+Then generate the VSIX package:
+
+```bash
+npx vsce package
+```
+
+If VSCE is installed globally:
+
+```bash
+vsce package
+```
+
+A file similar to this will be generated:
+
+```text
+aesjsontool-1.0.0.vsix
+```
+
+### Install the VSIX
+
+In VS Code:
+
+```text
+Extensions
+    ↓
+...
+    ↓
+Install from VSIX...
+```
+
+Select:
+
+```text
+aesjsontool-1.0.0.vsix
+```
+
+Or install from the terminal:
+
+```bash
+code --install-extension aesjsontool-1.0.0.vsix
 ```
 
 ## 📁 Project Structure
@@ -85,26 +166,37 @@ AES JSON Tool: Open
 aesjson/
 │
 ├── src/
-│   └── extension.ts          # Extension entry point
+│   └── extension.ts              # Extension entry point
 │
 ├── out/
-│   └── extension.js          # Compiled JavaScript
+│   └── extension.js              # Compiled JavaScript
 │
 ├── media/
-│   ├── index.html            # Tool UI
-│   └── crypto-js.min.js      # AES encryption library
+│   ├── index.html                # Tool UI
+│   └── crypto-js.min.js          # AES encryption library
 │
-├── package.json              # Extension configuration
-├── tsconfig.json             # TypeScript configuration
-├── README.md                 # Project documentation
-└── .gitignore                # Git ignored files
+├── package.json                  # Extension configuration
+├── tsconfig.json                 # TypeScript configuration
+├── README.md                     # Project documentation
+├── LICENSE                       # License
+└── .gitignore                    # Git ignored files
 ```
 
 ## ⚙️ Extension Command
 
-| Command               | Description             |
-| --------------------- | ----------------------- |
-| `AES JSON Tool: Open` | Opens the AES JSON Tool |
+| Command               | Description                      |
+| --------------------- | -------------------------------- |
+| `AES JSON Tool: Open` | Opens AES JSON Tool in a new tab |
+
+## ✨ Features
+
+- JSON & XML Formatter
+- AES Encryption / Decryption
+- JWT Decode + Basic Auth
+- Time & Epoch Converter
+- Base64 / URL / Image / PDF Converter
+- HTML / CSS / JS Playground
+- Light / Dark Theme
 
 ## 📋 Requirements
 
@@ -112,51 +204,87 @@ aesjson/
 * Node.js
 * npm
 
-No additional configuration is required after installation.
+No additional configuration is required after installing the extension.
 
 ## 🐛 Known Issues
 
 If you find any issues or have suggestions, please report them through the project's issue tracker.
 
-## What's in the folder
+## 🧪 Development
 
-* This folder contains all of the files necessary for your extension.
-* `package.json` - this is the manifest file in which you declare your extension and command.
-  * The sample plugin registers a command and defines its title and command name. With this information VS Code can show the command in the command palette. It doesn’t yet need to load the plugin.
-* `src/extension.ts` - this is the main file where you will provide the implementation of your command.
-  * The file exports one function, `activate`, which is called the very first time your extension is activated (in this case by executing the command). Inside the `activate` function we call `registerCommand`.
-  * We pass the function containing the implementation of the command as the second parameter to `registerCommand`.
+### Compile
 
-## Get up and running straight away
+```bash
+npm run compile
+```
 
-* Press `F5` to open a new window with your extension loaded.
-* Run your command from the command palette by pressing (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and typing `Hello World`.
-* Set breakpoints in your code inside `src/extension.ts` to debug your extension.
-* Find output from your extension in the debug console.
+### Watch Mode
 
-## Make changes
+```bash
+npm run watch
+```
 
-* You can relaunch the extension from the debug toolbar after changing code in `src/extension.ts`.
-* You can also reload (`Ctrl+R` or `Cmd+R` on Mac) the VS Code window with your extension to load your changes.
+### Debug
 
-## Explore the API
+Press:
 
-* You can open the full set of our API when you open the file `node_modules/@types/vscode/index.d.ts`.
+```text
+F5
+```
 
-## Run tests
+This opens the **Extension Development Host**.
 
-* Install the [Extension Test Runner](https://marketplace.visualstudio.com/items?itemName=ms-vscode.extension-test-runner)
-* Run the "watch" task via the **Tasks: Run Task** command. Make sure this is running, or tests might not be discovered.
-* Open the Testing view from the activity bar and click the Run Test" button, or use the hotkey `Ctrl/Cmd + ; A`
-* See the output of the test result in the Test Results view.
-* Make changes to `src/test/extension.test.ts` or create new test files inside the `test` folder.
-  * The provided test runner will only consider files matching the name pattern `**.test.ts`.
-  * You can create folders inside the `test` folder to structure your tests any way you want.
+You can set breakpoints in:
 
-## Go further
+```text
+src/extension.ts
+```
 
-* [Follow UX guidelines](https://code.visualstudio.com/api/ux-guidelines/overview) to create extensions that seamlessly integrate with VS Code's native interface and patterns.
-* Reduce the extension size and improve the startup time by [bundling your extension](https://code.visualstudio.com/api/working-with-extensions/bundling-extension).
-* [Publish your extension](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) on the VS Code extension marketplace.
-* Automate builds by setting up [Continuous Integration](https://code.visualstudio.com/api/working-with-extensions/continuous-integration).
-* Integrate to the [report issue](https://code.visualstudio.com/api/get-started/wrapping-up#issue-reporting) flow to get issue and feature requests reported by users.
+Debug output is available in the VS Code **Debug Console**.
+
+## 🔄 Development Workflow
+
+After making changes:
+
+```bash
+npm run compile
+```
+
+Then reload the Extension Development Host.
+
+You can also press:
+
+```text
+Ctrl + R
+```
+
+to reload the VS Code window.
+
+## 🚀 Build and Package
+
+Use the following commands before creating a release:
+
+```bash
+npm install
+npm run compile
+npx vsce package
+```
+
+Output:
+
+```text
+aesjsontool-x.x.x.vsix
+```
+
+## 📚 VS Code Extension Documentation
+
+* [VS Code Extension API](https://code.visualstudio.com/api)
+* [Extension UX Guidelines](https://code.visualstudio.com/api/ux-guidelines/overview)
+* [Bundling Extensions](https://code.visualstudio.com/api/working-with-extensions/bundling-extension)
+* [Publishing Extensions](https://code.visualstudio.com/api/working-with-extensions/publishing-extension)
+* [Continuous Integration](https://code.visualstudio.com/api/working-with-extensions/continuous-integration)
+* [Issue Reporting](https://code.visualstudio.com/api/get-started/wrapping-up#issue-reporting)
+
+## 📄 License
+
+This project is licensed under the MIT License.
