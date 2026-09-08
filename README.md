@@ -1,169 +1,62 @@
-# AES JSON Tool
+# Developer Toolbox
 
-A simple VS Code extension that provides useful developer tools for **AES Encryption/Decryption** and **JSON/XML formatting** directly inside Visual Studio Code.
+Useful developer tools that run **locally** inside VS Code.
 
-## ✨ Features
+## Features
 
-* 🔐 AES Encryption & Decryption
-* 📝 JSON Formatter
-* 📝 XML Formatter
-* ⚡ Easy access through VS Code Command Palette
-* 🌐 Simple and lightweight developer toolbox
+- JSON & XML Formatter
+- AES Encryption / Decryption
+- JWT Decode + Basic Auth
+- Time & Epoch Converter
+- Base64 / URL / Image / PDF Converter
+- HTML / CSS / JS Playground
+- Light / Dark Theme
 
-## 🚀 Usage
+## How to Use
 
-1. Install **AES JSON Tool** in VS Code.
-2. Open the Command Palette:
-   `Ctrl + Shift + P`
-3. Search for:
-   `AES JSON Tool: Open`
-4. Select the command to open the tool.
+1. Open Command Palette (`Ctrl + Shift + P` / `Cmd + Shift + P`)
+2. Search **CipherDeck: Open AES & JSON/XML Workbench**
+3. The toolbox opens in a new tab
 
-## 🛠️ Project Setup
+## Tools Overview
 
-### 1. Create the project
+| Tool              | Description                                      |
+|-------------------|--------------------------------------------------|
+| JSON & XML        | Validate, beautify, Text/Tree view               |
+| AES               | Encrypt/Decrypt locally (no data leaves your machine) |
+| JWT & Basic Auth  | Decode JWT, verify signatures, generate Basic Auth |
+| Time & Epoch      | Convert timestamps, calculate differences        |
+| File Converter    | Base64, URL, Image, PDF                          |
+| HTML/CSS/JS Studio| Live playground with preview & console           |
 
-```bash
-mkdir aesjson
-cd aesjson
-npm init -y
-```
+## Privacy
 
-### 2. Install VS Code Extension Generator
+Everything runs inside the VS Code WebView.  
+**No backend or external API is used.**
 
-```bash
-npm install -g yo generator-code
-```
+## License
 
-### 3. Generate the extension
+MIT
 
-```bash
-yo code
-```
+## Online Version
 
-Select:
+https://surajprasadd.github.io/Toolbox/
 
-```text
-New Extension (TypeScript)
-```
 
-Example configuration:
+## JSON & XML Formatter
+<img src="images/jsonxmlworkbench.png" alt="Alt text" width="600">
 
-```text
-Name: AES JSON Tool
-Identifier: aesjsontool
-Description: AES Encryption/Decryption and JSON/XML Formatter
-Package Manager: npm
-```
+## AES Encryption / Decryption
+<img src="images/aes.png" alt="Alt text" width="600">
 
-### 4. Install dependencies
+## JWT Decode + Basic Auth
+<img src="images/jwt.png" alt="Alt text" width="600">
 
-```bash
-npm install
-```
+## Time & Epoch Converter
+<img src="images/time.png" alt="Alt text" width="600">
 
-### 5. Compile the extension
+## Base64 / URL / Image / PDF Converter
+<img src="images/fileconverter.png" alt="Alt text" width="600">
 
-```bash
-npm run compile
-```
-
-After successful compilation, the `out` folder will be generated.
-
-### 6. Run the extension
-
-Open the project in VS Code:
-
-```bash
-code .
-```
-
-Press:
-
-```text
-F5
-```
-
-A new **Extension Development Host** window will open.
-
-Then press:
-
-```text
-Ctrl + Shift + P
-```
-
-Search for:
-
-```text
-AES JSON Tool: Open
-```
-
-## 📁 Project Structure
-
-```text
-aesjson/
-│
-├── src/
-│   └── extension.ts          # Extension entry point
-│
-├── out/
-│   └── extension.js          # Compiled JavaScript
-│
-├── media/
-│   ├── index.html            # Tool UI
-│   └── crypto-js.min.js      # AES encryption library
-│
-├── package.json              # Extension configuration
-├── tsconfig.json             # TypeScript configuration
-├── README.md                 # Project documentation
-└── .gitignore                # Git ignored files
-```
-
-## ⚙️ Extension Command
-
-| Command               | Description             |
-| --------------------- | ----------------------- |
-| `AES JSON Tool: Open` | Opens the AES JSON Tool |
-
-## 📋 Requirements
-
-* Visual Studio Code
-* Node.js
-* npm
-
-No additional configuration is required after installation.
-
-## 🐛 Known Issues
-
-If you find any issues or have suggestions, please report them through the project's issue tracker.
-
-## 📦 Release Notes
-
-### 1.0.0
-
-Initial release of **AES JSON Tool**.
-
-* Added AES Encryption & Decryption
-* Added JSON Formatter
-* Added XML Formatter
-* Added VS Code integration
-
-## 🌐 Online Developer Toolbox
-
-The same developer tools are also available online:
-
-**https://surajprasadd.github.io/Toolbox/**
-
-## 🛠️ Built With
-
-* TypeScript
-* HTML
-* CSS
-* JavaScript
-* VS Code Extension API
-* CryptoJS
-* AI-assisted development using Claude AI
-
----
-
-**Enjoy using AES JSON Tool! 🚀**
+## HTML / CSS / JS Playground
+<img src="images/html.png" alt="Alt text" width="600">

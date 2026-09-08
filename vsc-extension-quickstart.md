@@ -1,5 +1,123 @@
 # Welcome to your VS Code Extension
 
+## 🛠️ Project Setup
+
+### 1. Create the project
+
+```bash
+mkdir aesjson
+cd aesjson
+npm init -y
+```
+
+### 2. Install VS Code Extension Generator
+
+```bash
+npm install -g yo generator-code
+```
+
+### 3. Generate the extension
+
+```bash
+yo code
+```
+
+Select:
+
+```text
+New Extension (TypeScript)
+```
+
+Example configuration:
+
+```text
+Name: AES JSON Tool
+Identifier: aesjsontool
+Description: AES Encryption/Decryption and JSON/XML Formatter
+Package Manager: npm
+```
+
+### 4. Install dependencies
+
+```bash
+npm install
+```
+
+### 5. Compile the extension
+
+```bash
+npm run compile
+```
+
+After successful compilation, the `out` folder will be generated.
+
+### 6. Run the extension
+
+Open the project in VS Code:
+
+```bash
+code .
+```
+
+Press:
+
+```text
+F5
+```
+
+A new **Extension Development Host** window will open.
+
+Then press:
+
+```text
+Ctrl + Shift + P
+```
+
+Search for:
+
+```text
+AES JSON Tool: Open
+```
+
+## 📁 Project Structure
+
+```text
+aesjson/
+│
+├── src/
+│   └── extension.ts          # Extension entry point
+│
+├── out/
+│   └── extension.js          # Compiled JavaScript
+│
+├── media/
+│   ├── index.html            # Tool UI
+│   └── crypto-js.min.js      # AES encryption library
+│
+├── package.json              # Extension configuration
+├── tsconfig.json             # TypeScript configuration
+├── README.md                 # Project documentation
+└── .gitignore                # Git ignored files
+```
+
+## ⚙️ Extension Command
+
+| Command               | Description             |
+| --------------------- | ----------------------- |
+| `AES JSON Tool: Open` | Opens the AES JSON Tool |
+
+## 📋 Requirements
+
+* Visual Studio Code
+* Node.js
+* npm
+
+No additional configuration is required after installation.
+
+## 🐛 Known Issues
+
+If you find any issues or have suggestions, please report them through the project's issue tracker.
+
 ## What's in the folder
 
 * This folder contains all of the files necessary for your extension.

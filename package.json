@@ -1,8 +1,8 @@
 {
-  "name": "aesjsontool",
-  "displayName": "AES JSON Tool",
+  "name": "aesjsonxml",
+  "displayName": "AES JSON XML Tool",
   "description": "AES-128/192/256 encrypt & decrypt (ECB/CBC/CTR/CFB/OFB/GCM) plus a JSON & XML validator, beautifier, tree viewer, and side-by-side diff — all inside a VS Code webview panel.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "SurajPrasad1993",
   "engines": {
     "vscode": "^1.136.0"
@@ -12,8 +12,8 @@
     "url": "https://github.com/SurajPrasadd/aesjsontool.git"
   },
   "categories": [
-    "Other",
-    "Formatters"
+    "Formatters",
+    "Other"
   ],
   "icon":"icon.ico",
   "keywords": [
@@ -23,8 +23,16 @@
     "cryptography",
     "json",
     "xml",
-    "diff",
-    "beautify"
+    "formatter",
+    "beautify",
+    "jwt",
+    "base64",
+    "epoch",
+    "timestamp",
+    "converter",
+    "html",
+    "css",
+    "playground"
   ],
   "activationEvents": [
     "onCommand:aesjsontool.open"
@@ -35,7 +43,7 @@
       {
         "command": "aesjsontool.open",
         "title": "Open AES & JSON/XML Workbench",
-        "category": "AesJsonTool"
+        "category": "CipherDeck"
       }
     ],
     "menus": {

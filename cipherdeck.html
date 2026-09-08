@@ -4,26 +4,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- CSP (important for webview) -->
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'none';
-    script-src {{CSP_SOURCE}} 'unsafe-inline';
-    style-src {{CSP_SOURCE}} 'unsafe-inline';
-    font-src {{CSP_SOURCE}};
-    img-src {{CSP_SOURCE}} data:;
-  ">
-               
-  <title>CipherDeck — Workbench : AES JSON XML Tool</title>
-    <!-- Local Fonts -->
-  <style>
-    {{FONTS_CSS}}
-  </style>
+  <title>CipherDeck — Dev Toolbox</title>
+  <!-- CryptoJS -->
+  <script src="{{CRYPTO_JS_URI}}"></script>
 
+  <!-- CodeMirror CSS -->
   <link rel="stylesheet" href="{{CODEMIRROR_CSS}}" />
   <link rel="stylesheet" href="{{MATERIAL_DARKER_CSS}}" />
 
-  <script src="{{CRYPTO_JS_URI}}"></script>
-  
+  <!-- CodeMirror JS + modes + addons -->
   <script src="{{CODEMIRROR_JS}}"></script>
   <script src="{{XML_MODE}}"></script>
   <script src="{{CSS_MODE}}"></script>
@@ -33,7 +22,21 @@
   <script src="{{CLOSE_BRACKETS}}"></script>
   <script src="{{ACTIVE_LINE}}"></script>
 
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script> -->
+
   <style>
+    @import url(https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap);
+
     :root[data-theme=light] {
       --bg-body: #f0f4f8;
       --bg-card: #fff;
