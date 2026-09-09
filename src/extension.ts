@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
              */
             const panel = vscode.window.createWebviewPanel(
                 'aesjsontool',
-                'CipherDeck — Workbench : AES JSON XML Tool',
+                'Workbench - AES JSON',
                 column,
                 {
                     enableScripts: true,

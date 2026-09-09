@@ -443,6 +443,79 @@
     .cd-output-wrap textarea, .cd-output-wrap .jt-tree { min-height: 440px; font-size: 12.5px }
     .cd-output-wrap textarea { white-space: pre }
 
+    /* Search bar (JSON Formatter + JSON/XML Workbench) */
+    .cd-search {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3px 6px 3px 8px;
+      min-width: 0;
+    }
+    .cd-search-input {
+      background: transparent;
+      border: 0;
+      outline: 0;
+      color: var(--t-base);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      width: 140px;
+      min-width: 80px;
+      padding: 4px 2px;
+    }
+    .cd-search-input::placeholder { color: var(--t-light) }
+    .cd-search-count {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10.5px;
+      color: var(--t-muted);
+      white-space: nowrap;
+      min-width: 42px;
+      text-align: center;
+      user-select: none;
+    }
+    .cd-search-count.is-empty { color: var(--t-light) }
+    .cd-search-count.has-match { color: var(--primary) }
+    .cd-search-count.no-match { color: var(--danger) }
+    .cd-search-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 1px;
+    }
+    .cd-search-nav .icon-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      color: var(--t-muted);
+    }
+    .cd-search-nav .icon-btn:hover:not(:disabled) {
+      background: var(--bg-hover);
+      color: var(--t-base);
+    }
+    .cd-search-nav .icon-btn:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+    .cd-search-nav .icon-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+    .jt-node.is-search-hit > .jt-node-head,
+    .jt-leaf.is-search-hit {
+      background: color-mix(in oklab, var(--primary) 18%, transparent);
+      outline: 1px solid color-mix(in oklab, var(--primary) 40%, transparent);
+      border-radius: 4px;
+    }
+    .jt-node.is-search-current > .jt-node-head,
+    .jt-leaf.is-search-current {
+      background: color-mix(in oklab, var(--primary) 32%, transparent);
+      outline: 2px solid var(--primary);
+    }
+
     .jt-tree {
       font-family: "JetBrains Mono", monospace; font-size: 12.5px; line-height: 1.8; padding: 10px 14px;
       overflow: auto; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
@@ -636,14 +709,6 @@
         <div class="cd-topbar">
           <div style="display:flex; align-items:center; gap:12px;">
             <span class="badge success dot">Runs locally · no data leaves your browser</span>
-            <label class="cd-theme-toggle" id="theme-toggle">
-              <svg id="theme-icon-sun" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-              </svg>
-              <span class="switch"><input type="checkbox" id="theme-switch" /><span class="track"></span></span>
-              <svg id="theme-icon-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" /></svg>
-            </label>
           </div>
         </div>
       </header>
@@ -835,12 +900,12 @@
         <div class="cd-topbar">
           <div style="display:flex; align-items:center; gap:12px;">
             <span class="badge success dot">Runs locally · no data leaves your browser</span>
-            <label class="cd-theme-toggle" id="theme-toggle1">
+            <label class="cd-theme-toggle" id="theme-toggle">
               <svg id="theme-icon-sun" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="4" />
                 <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
               </svg>
-              <span class="switch"><input type="checkbox" id="theme-switch1" /><span class="track"></span></span>
+              <span class="switch"><input type="checkbox" id="theme-switch" /><span class="track"></span></span>
               <svg id="theme-icon-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" /></svg>
             </label>
           </div>
@@ -912,6 +977,19 @@
                 </div>
               </div>
               <div class="cd-actions">
+                <div class="cd-search" id="doc1-search">
+                  <input class="cd-search-input" id="doc1-search-input" type="text" placeholder="Search…" autocomplete="off" spellcheck="false"
+                    oninput="cdSearchQuery(1)" onkeydown="cdSearchKey(event, 1)" />
+                  <span class="cd-search-count is-empty" id="doc1-search-count">—</span>
+                  <div class="cd-search-nav">
+                    <button type="button" class="icon-btn" id="doc1-search-prev" title="Previous match (Shift+Enter)" onclick="cdSearchNav(1, -1)" disabled>
+                      <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+                    </button>
+                    <button type="button" class="icon-btn" id="doc1-search-next" title="Next match (Enter)" onclick="cdSearchNav(1, 1)" disabled>
+                      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                  </div>
+                </div>
                 <button class="card-action cd-linklike" onclick="copyField('doc1-output')">Copy<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg></button>
                 <button class="icon-btn cd-fs-btn" onclick="cdToggleFullscreen('doc1-output-wrap','doc1-fs-icon')" title="Toggle full screen">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" id="doc1-fs-icon"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" /></svg>
@@ -1010,6 +1088,19 @@
                 </div>
               </div>
               <div class="cd-actions">
+                <div class="cd-search" id="doc2-search">
+                  <input class="cd-search-input" id="doc2-search-input" type="text" placeholder="Search…" autocomplete="off" spellcheck="false"
+                    oninput="cdSearchQuery(2)" onkeydown="cdSearchKey(event, 2)" />
+                  <span class="cd-search-count is-empty" id="doc2-search-count">—</span>
+                  <div class="cd-search-nav">
+                    <button type="button" class="icon-btn" id="doc2-search-prev" title="Previous match (Shift+Enter)" onclick="cdSearchNav(2, -1)" disabled>
+                      <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+                    </button>
+                    <button type="button" class="icon-btn" id="doc2-search-next" title="Next match (Enter)" onclick="cdSearchNav(2, 1)" disabled>
+                      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                    </button>
+                  </div>
+                </div>
                 <button class="card-action cd-linklike" onclick="copyField('doc2-output')">Copy<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg></button>
                 <button class="icon-btn cd-fs-btn" onclick="cdToggleFullscreen('doc2-output-wrap','doc2-fs-icon')" title="Toggle full screen">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" id="doc2-fs-icon"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" /></svg>
@@ -1310,7 +1401,21 @@
 
         <div class="cd-output-wrap" id="jq-output-wrap">
           <div class="cd-output-head">
-            <div class="cd-output-head-left"></div>
+            <div class="cd-output-head-left">
+              <div class="cd-search" id="jq-search">
+                <input class="cd-search-input" id="jq-search-input" type="text" placeholder="Search…" autocomplete="off" spellcheck="false"
+                  oninput="cdSearchQuery('jq')" onkeydown="cdSearchKey(event, 'jq')" />
+                <span class="cd-search-count is-empty" id="jq-search-count">—</span>
+                <div class="cd-search-nav">
+                  <button type="button" class="icon-btn" id="jq-search-prev" title="Previous match (Shift+Enter)" onclick="cdSearchNav('jq', -1)" disabled>
+                    <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+                  </button>
+                  <button type="button" class="icon-btn" id="jq-search-next" title="Next match (Enter)" onclick="cdSearchNav('jq', 1)" disabled>
+                    <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
             <div class="cd-actions">
               <button class="card-action cd-linklike" onclick="copyField('jq-io')">Copy<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg></button>
               <button class="icon-btn cd-fs-btn" onclick="cdToggleFullscreen('jq-output-wrap','jq-fs-icon')" title="Toggle full screen">
@@ -1541,18 +1646,12 @@ console.log('Studio ready');</textarea>
   <script>
     /* ---------------- theme ---------------- */
     const themeSwitch = document.getElementById('theme-switch');
-    const themeSwitch1 = document.getElementById('theme-switch1');
     function applyTheme(isDark) {
       document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
       themeSwitch.checked = isDark;
-      themeSwitch1.checked = isDark;
     }
     (function initTheme() { applyTheme(false); })();
     document.getElementById('theme-toggle').addEventListener('click', (e) => {
-      e.preventDefault();
-      applyTheme(!(document.documentElement.getAttribute('data-theme') === 'dark'));
-    });
-    document.getElementById('theme-toggle1').addEventListener('click', (e) => {
       e.preventDefault();
       applyTheme(!(document.documentElement.getAttribute('data-theme') === 'dark'));
     });
@@ -1637,6 +1736,229 @@ console.log('Studio ready');</textarea>
     function copyText(text) {
       if (!text) return;
       navigator.clipboard.writeText(text).catch(() => { });
+    }
+
+    /* =========================================================================
+       Shared text / tree search (JSON Formatter + JSON/XML Workbench)
+       ========================================================================= */
+    const cdSearchStates = {
+      1: { query: '', matches: [], current: -1 },
+      2: { query: '', matches: [], current: -1 },
+      jq: { query: '', matches: [], current: -1 }
+    };
+
+    function cdSearchGetTextarea(id) {
+      if (id === 'jq') return document.getElementById('jq-io');
+      return document.getElementById('doc' + id + '-output');
+    }
+    function cdSearchGetTree(id) {
+      if (id === 'jq') return document.getElementById('jq-output-tree');
+      return document.getElementById('doc' + id + '-output-tree');
+    }
+    function cdSearchGetView(id) {
+      if (id === 'jq') return jqView;
+      return docState[id].view;
+    }
+    function cdSearchGetSourceText(id) {
+      if (id === 'jq') return document.getElementById('jq-io').value || '';
+      const out = document.getElementById('doc' + id + '-output').value;
+      if (out) return out;
+      return document.getElementById('doc' + id + '-input').value || '';
+    }
+
+    function cdSearchFindMatches(text, query) {
+      if (!query) return [];
+      const matches = [];
+      const hay = text.toLowerCase();
+      const needle = query.toLowerCase();
+      if (!needle) return matches;
+      let pos = 0;
+      while (pos < hay.length) {
+        const idx = hay.indexOf(needle, pos);
+        if (idx === -1) break;
+        matches.push({ start: idx, end: idx + query.length });
+        pos = idx + Math.max(1, needle.length);
+      }
+      return matches;
+    }
+
+    function cdSearchUpdateCount(id) {
+      const st = cdSearchStates[id];
+      const countEl = document.getElementById((id === 'jq' ? 'jq' : 'doc' + id) + '-search-count');
+      const prevBtn = document.getElementById((id === 'jq' ? 'jq' : 'doc' + id) + '-search-prev');
+      const nextBtn = document.getElementById((id === 'jq' ? 'jq' : 'doc' + id) + '-search-next');
+      if (!countEl) return;
+      countEl.classList.remove('is-empty', 'has-match', 'no-match');
+      if (!st.query) {
+        countEl.textContent = '—';
+        countEl.classList.add('is-empty');
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
+        return;
+      }
+      if (!st.matches.length) {
+        countEl.textContent = '0/0';
+        countEl.classList.add('no-match');
+        if (prevBtn) prevBtn.disabled = true;
+        if (nextBtn) nextBtn.disabled = true;
+        return;
+      }
+      countEl.textContent = (st.current + 1) + '/' + st.matches.length;
+      countEl.classList.add('has-match');
+      if (prevBtn) prevBtn.disabled = false;
+      if (nextBtn) nextBtn.disabled = false;
+    }
+
+    function cdSearchClearTreeHighlights(id) {
+      const tree = cdSearchGetTree(id);
+      if (!tree) return;
+      tree.querySelectorAll('.is-search-hit, .is-search-current').forEach(el => {
+        el.classList.remove('is-search-hit', 'is-search-current');
+      });
+    }
+
+    function cdSearchCollectTreeNodes(id) {
+      const tree = cdSearchGetTree(id);
+      if (!tree) return [];
+      const nodes = [];
+      tree.querySelectorAll('.jt-node-head, .jt-leaf').forEach(el => {
+        const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+        if (text) nodes.push({ el, text });
+      });
+      return nodes;
+    }
+
+    function cdSearchExpandAncestors(nodeEl) {
+      let parent = nodeEl.closest('.jt-node');
+      while (parent) {
+        if (parent.classList.contains('is-collapsed')) {
+          const toggle = parent.querySelector(':scope > .jt-node-head > .jt-toggle');
+          if (toggle && !toggle.disabled) toggle.click();
+        }
+        parent = parent.parentElement ? parent.parentElement.closest('.jt-node') : null;
+      }
+    }
+
+    function cdSearchApplyTree(id) {
+      const st = cdSearchStates[id];
+      cdSearchClearTreeHighlights(id);
+      if (!st.query) return;
+      const nodes = cdSearchCollectTreeNodes(id);
+      const needle = st.query.toLowerCase();
+      const hitEls = [];
+      nodes.forEach(({ el, text }) => {
+        if (text.toLowerCase().includes(needle)) {
+          el.classList.add('is-search-hit');
+          // mark the wrapping node too when it's a head
+          const wrap = el.closest('.jt-node');
+          if (wrap) wrap.classList.add('is-search-hit');
+          hitEls.push(el);
+        }
+      });
+      st.matches = hitEls.map((_, i) => ({ start: i, end: i })); // index-based for tree
+      st._treeHits = hitEls;
+      if (hitEls.length) {
+        if (st.current < 0 || st.current >= hitEls.length) st.current = 0;
+        const cur = hitEls[st.current];
+        cur.classList.add('is-search-current');
+        const wrap = cur.closest('.jt-node');
+        if (wrap) wrap.classList.add('is-search-current');
+        cdSearchExpandAncestors(cur);
+        cur.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      } else {
+        st.current = -1;
+        st._treeHits = [];
+      }
+    }
+
+    function cdSearchApplyText(id) {
+      const st = cdSearchStates[id];
+      const ta = cdSearchGetTextarea(id);
+      if (!ta) return;
+      const text = ta.value || '';
+      st.matches = cdSearchFindMatches(text, st.query);
+      if (!st.matches.length) {
+        st.current = -1;
+        return;
+      }
+      if (st.current < 0 || st.current >= st.matches.length) st.current = 0;
+      const m = st.matches[st.current];
+      try {
+        ta.focus();
+        ta.setSelectionRange(m.start, m.end);
+        // Approximate scroll so the selection is visible
+        const before = text.slice(0, m.start);
+        const line = before.split('\n').length;
+        const style = window.getComputedStyle(ta);
+        const lineHeight = parseFloat(style.lineHeight) || 18;
+        const padTop = parseFloat(style.paddingTop) || 0;
+        ta.scrollTop = Math.max(0, (line - 4) * lineHeight - padTop);
+      } catch (e) { /* ignore selection errors on some hosts */ }
+    }
+
+    function cdSearchRun(id) {
+      const st = cdSearchStates[id];
+      const view = cdSearchGetView(id);
+      if (view === 'Tree') {
+        cdSearchApplyTree(id);
+      } else {
+        st._treeHits = null;
+        cdSearchApplyText(id);
+      }
+      cdSearchUpdateCount(id);
+    }
+
+    function cdSearchQuery(id) {
+      const input = document.getElementById((id === 'jq' ? 'jq' : 'doc' + id) + '-search-input');
+      const st = cdSearchStates[id];
+      st.query = (input && input.value) ? input.value : '';
+      st.current = -1;
+      cdSearchRun(id);
+    }
+
+    function cdSearchNav(id, direction) {
+      const st = cdSearchStates[id];
+      if (!st.matches.length) return;
+      st.current = (st.current + direction + st.matches.length) % st.matches.length;
+      const view = cdSearchGetView(id);
+      if (view === 'Tree' && st._treeHits && st._treeHits.length) {
+        cdSearchClearTreeHighlights(id);
+        st._treeHits.forEach(el => {
+          el.classList.add('is-search-hit');
+          const wrap = el.closest('.jt-node');
+          if (wrap) wrap.classList.add('is-search-hit');
+        });
+        const cur = st._treeHits[st.current];
+        cur.classList.add('is-search-current');
+        const wrap = cur.closest('.jt-node');
+        if (wrap) wrap.classList.add('is-search-current');
+        cdSearchExpandAncestors(cur);
+        cur.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      } else {
+        cdSearchApplyText(id);
+      }
+      cdSearchUpdateCount(id);
+    }
+
+    function cdSearchKey(e, id) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (e.shiftKey) cdSearchNav(id, -1);
+        else cdSearchNav(id, 1);
+      } else if (e.key === 'Escape') {
+        const input = document.getElementById((id === 'jq' ? 'jq' : 'doc' + id) + '-search-input');
+        if (input) {
+          input.value = '';
+          cdSearchQuery(id);
+          input.blur();
+        }
+      }
+    }
+
+    // Re-run search when content or view changes
+    function cdSearchRefresh(id) {
+      if (cdSearchStates[id] && cdSearchStates[id].query) cdSearchRun(id);
+      else cdSearchUpdateCount(id);
     }
 
     /* =========================================================================
@@ -1921,6 +2243,7 @@ console.log('Studio ready');</textarea>
       jtUpdateStats(n, formattedText);
       docLastResult[n] = { format: docState[n].format, text: formattedText };
       if (docState[n].view === 'Tree') jtRenderTree(n);
+      cdSearchRefresh(n);
     }
     function jtGetInput(n) { return el(n, 'input').value; }
 
@@ -1966,6 +2289,7 @@ console.log('Studio ready');</textarea>
       treeEl.style.display = view === 'Tree' ? 'block' : 'none';
       treeActions.style.display = view === 'Tree' ? 'flex' : 'none';
       if (view === 'Tree') jtRenderTree(n);
+      else cdSearchRefresh(n);
     }
 
     function jtRenderTree(n) {
@@ -1976,6 +2300,7 @@ console.log('Studio ready');</textarea>
         empty.className = 'jt-tree-empty';
         empty.textContent = 'Run Validate or Beautify to see the tree view.';
         container.appendChild(empty);
+        cdSearchRefresh(n);
         return;
       }
       try {
@@ -1992,6 +2317,7 @@ console.log('Studio ready');</textarea>
         err.textContent = 'Could not build tree view: ' + e.message;
         container.appendChild(err);
       }
+      cdSearchRefresh(n);
     }
 
     function jtSetAllCollapsed(n, collapse) {
@@ -2029,6 +2355,8 @@ console.log('Studio ready');</textarea>
       jtClearMessages(n);
       el(n, 'status-badge').textContent = 'No input yet';
       el(n, 'status-badge').className = 'badge';
+      const si = document.getElementById('doc' + n + '-search-input');
+      if (si) { si.value = ''; cdSearchQuery(n); }
     }
 
     function docOpenFile(n, inputEl) {
@@ -2627,6 +2955,7 @@ console.log('Studio ready');</textarea>
         jqLastValid = null;
         badge.textContent = 'No input yet'; badge.className = 'badge';
         if (jqView === 'Tree') jqRenderTree();
+        else cdSearchRefresh('jq');
         return;
       }
       try {
@@ -2635,11 +2964,13 @@ console.log('Studio ready');</textarea>
         errBox.style.display = 'none';
         badge.textContent = 'Valid'; badge.className = 'badge success';
         if (jqView === 'Tree') jqRenderTree();
+        else cdSearchRefresh('jq');
         jqReformatTimer = setTimeout(jqReformatNow, 700);
       } catch (e) {
         errText.textContent = e.message;
         errBox.style.display = 'grid';
         badge.textContent = 'Invalid'; badge.className = 'badge danger';
+        cdSearchRefresh('jq');
       }
     }
 
@@ -2660,6 +2991,7 @@ console.log('Studio ready');</textarea>
         }
         jqLastValid = obj;
         if (jqView === 'Tree') jqRenderTree();
+        else cdSearchRefresh('jq');
       } catch (e) { /* leave as-is; jqFormat already surfaced the error */ }
     }
 
@@ -2671,6 +3003,7 @@ console.log('Studio ready');</textarea>
       treeEl.style.display = view === 'Tree' ? 'block' : 'none';
       treeActions.style.display = view === 'Tree' ? 'flex' : 'none';
       if (view === 'Tree') { jqReformatNow(); jqRenderTree(); }
+      else cdSearchRefresh('jq');
     }
     function jqRenderTree() {
       const container = document.getElementById('jq-output-tree');
@@ -2680,9 +3013,11 @@ console.log('Studio ready');</textarea>
         empty.className = 'jt-tree-empty';
         empty.textContent = 'Start typing valid JSON to see the tree view.';
         container.appendChild(empty);
+        cdSearchRefresh('jq');
         return;
       }
       container.appendChild(jtJsonNode(jqLastValid, null, false));
+      cdSearchRefresh('jq');
     }
     function jqSetAllCollapsed(collapse) {
       const tree = document.getElementById('jq-output-tree');
@@ -2699,7 +3034,12 @@ console.log('Studio ready');</textarea>
         if (preview) preview.style.display = collapse ? '' : 'none';
       });
     }
-    function jqClear() { document.getElementById('jq-io').value = ''; jqFormat(); }
+    function jqClear() {
+      document.getElementById('jq-io').value = '';
+      const si = document.getElementById('jq-search-input');
+      if (si) { si.value = ''; cdSearchQuery('jq'); }
+      jqFormat();
+    }
     function jqOpenFile(inputEl) {
       const file = inputEl.files[0];
       if (!file) return;
