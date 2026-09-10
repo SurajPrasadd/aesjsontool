@@ -4,13 +4,9 @@ import * as path from 'path';
 
 export function activate(context: vscode.ExtensionContext) {
 
-    /**
-     * Register command:
-     * AES JSON Tool: Open
-     *
-     * Every time this command is executed,
-     * a NEW Webview tab will be created.
-     */
+    // -------------------------------------------------
+    // Open the AES JSON Workbench (WebView)
+    // -------------------------------------------------
     const openCommand = vscode.commands.registerCommand(
         'aesjsontool.open',
         () => {
@@ -55,32 +51,143 @@ export function activate(context: vscode.ExtensionContext) {
                 }
             );
 
-            // Load HTML into the WebView.
-            panel.webview.html = getHtml(
-                context,
-                panel.webview
+            panel.webview.html = getHtml(context, panel.webview);
+
+            panel.onDidDispose(() => {}, null, context.subscriptions);
+        }
+    );
+
+    // -------------------------------------------------
+    // Beautify current document (JSON or XML)
+    // -------------------------------------------------
+    const beautifyJsonCommand = vscode.commands.registerCommand(
+        'aesjsontool.beautifyJsonXml',
+        async () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                vscode.window.showErrorMessage('No active editor found.');
+                return;
+            }
+
+            const document = editor.document;
+            const originalText = document.getText().trim();
+
+            if (!originalText) {
+                vscode.window.showErrorMessage('Document is empty.');
+                return;
+            }
+
+            let beautified: string;
+            let languageId: string;
+
+            // 1. Try JSON first
+            try {
+                const parsed = JSON.parse(originalText);
+                beautified = JSON.stringify(parsed, null, 2);
+                languageId = 'json';
+            }
+            // 2. Fallback to XML
+            catch {
+                try {
+                    beautified = formatXml(originalText);
+                    languageId = 'xml';
+                } catch (err: any) {
+                    vscode.window.showErrorMessage(
+                        `Content is neither valid JSON nor well-formed XML.\n${err?.message || ''}`
+                    );
+                    return;
+                }
+            }
+
+            // Replace entire document content
+            const fullRange = new vscode.Range(
+                document.positionAt(0),
+                document.positionAt(document.getText().length)
             );
 
-            /**
-             * Handle panel disposal.
-             *
-             * This is optional because the panel is local
-             * and will be garbage collected after disposal.
-             */
-            panel.onDidDispose(
-                () => {
-                    // Panel closed.
-                },
-                null,
-                context.subscriptions
+            await editor.edit(editBuilder => {
+                editBuilder.replace(fullRange, beautified);
+            });
+
+            // Set correct language mode
+            await vscode.languages.setTextDocumentLanguage(document, languageId);
+
+            vscode.window.showInformationMessage(
+                languageId === 'json'
+                    ? 'JSON beautified successfully.'
+                    : 'XML beautified successfully.'
             );
         }
     );
 
-    // Dispose command when extension is deactivated.
-    context.subscriptions.push(openCommand);
+    context.subscriptions.push(openCommand, beautifyJsonCommand);
 }
 
+/**
+ * Reliable pure-JS XML pretty printer (no dependencies)
+ * Handles:
+ *  - nested elements
+ *  - self-closing tags
+ *  - comments <!-- -->
+ *  - processing instructions <?xml ... ?>
+ *  - CDATA
+ *  - attributes
+ *  - mixed content reasonably well
+ */
+function formatXml(xml: string, indentSize: number = 2): string {
+    const PADDING = ' '.repeat(indentSize);
+    let formatted = '';
+    let pad = 0;
+
+    // Normalize line endings and put tags on separate lines
+    xml = xml
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/(>)(\s*)(<)/g, '>$2\n<')   // ensure every tag starts on a new line
+        .replace(/\n\s*\n/g, '\n');          // remove empty lines
+
+    const lines = xml
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+    for (const line of lines) {
+        // Closing tag → decrease indent first
+        if (line.startsWith('</')) {
+            pad = Math.max(0, pad - 1);
+            formatted += PADDING.repeat(pad) + line + '\n';
+            continue;
+        }
+
+        // Self-closing, processing instruction, comment, or CDATA
+        if (
+            line.endsWith('/>') ||
+            line.startsWith('<?') ||
+            line.startsWith('<!--') ||
+            line.startsWith('<![CDATA[')
+        ) {
+            formatted += PADDING.repeat(pad) + line + '\n';
+            continue;
+        }
+
+        // Opening tag
+        if (line.startsWith('<')) {
+            formatted += PADDING.repeat(pad) + line + '\n';
+
+            // Increase pad only for real opening elements
+            // (not self-closing and not containing a closing tag on same line)
+            if (!line.endsWith('/>') && !line.includes('</')) {
+                pad++;
+            }
+            continue;
+        }
+
+        // Text content / mixed content
+        formatted += PADDING.repeat(pad) + line + '\n';
+    }
+
+    return formatted.trimEnd() + '\n';
+}
 
 /**
  * Generates the HTML for the WebView.
@@ -116,18 +223,17 @@ function getHtml(
         ).toString();
     };
 
-    // Local files
-    const cryptoJsUri          = getUri('js','crypto-js.min.js');
-    const codemirrorCssUri     = getUri('css','codemirror.min.css');
-    const materialDarkerCssUri = getUri('css','material-darker.min.css');
-    const codemirrorJsUri      = getUri('js','codemirror.min.js');
-    const xmlModeUri           = getUri('js','xml.min.js');
-    const cssModeUri           = getUri('js','css.min.js');
-    const jsModeUri            = getUri('js','javascript.min.js');
-    const htmlmixedModeUri     = getUri('js','htmlmixed.min.js');
-    const matchBracketsUri     = getUri('js','matchbrackets.min.js');
-    const closeBracketsUri     = getUri('js','closebrackets.min.js');
-    const activeLineUri        = getUri('js','active-line.min.js');
+    const cryptoJsUri          = getUri('js', 'crypto-js.min.js');
+    const codemirrorCssUri     = getUri('css', 'codemirror.min.css');
+    const materialDarkerCssUri = getUri('css', 'material-darker.min.css');
+    const codemirrorJsUri      = getUri('js', 'codemirror.min.js');
+    const xmlModeUri           = getUri('js', 'xml.min.js');
+    const cssModeUri           = getUri('js', 'css.min.js');
+    const jsModeUri            = getUri('js', 'javascript.min.js');
+    const htmlmixedModeUri     = getUri('js', 'htmlmixed.min.js');
+    const matchBracketsUri     = getUri('js', 'matchbrackets.min.js');
+    const closeBracketsUri     = getUri('js', 'closebrackets.min.js');
+    const activeLineUri        = getUri('js', 'active-line.min.js');
 
     const interRegular         = getUri('fonts', 'Inter-Regular.woff2');
     const interMedium          = getUri('fonts', 'Inter-Medium.woff2');
@@ -138,7 +244,7 @@ function getHtml(
     const interTightBold       = getUri('fonts', 'InterTight-Bold.woff2');
     const jetbrainsRegular     = getUri('fonts', 'JetBrainsMono-Regular.woff2');
     const jetbrainsMedium      = getUri('fonts', 'JetBrainsMono-Medium.woff2');
-    
+
 // Build @font-face CSS
     const fontsCss = `
 @font-face {
