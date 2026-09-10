@@ -500,6 +500,12 @@
       outline: 1px solid color-mix(in oklab, var(--primary) 40%, transparent);
       border-radius: 4px;
     }
+    /* Parent / ancestor path — lighter tint so the path is visible without competing with the match */
+    .jt-node.is-search-ancestor > .jt-node-head {
+      background: color-mix(in oklab, var(--primary) 8%, transparent);
+      outline: 1px dashed color-mix(in oklab, var(--primary) 28%, transparent);
+      border-radius: 4px;
+    }
     .jt-node.is-search-current > .jt-node-head,
     .jt-leaf.is-search-current {
       background: color-mix(in oklab, var(--primary) 32%, transparent);
@@ -1816,8 +1822,8 @@ console.log('Studio ready');</textarea>
     function cdSearchClearTreeHighlights(id) {
       const tree = cdSearchGetTree(id);
       if (!tree) return;
-      tree.querySelectorAll('.is-search-hit, .is-search-current').forEach(el => {
-        el.classList.remove('is-search-hit', 'is-search-current');
+      tree.querySelectorAll('.is-search-hit, .is-search-current, .is-search-ancestor').forEach(el => {
+        el.classList.remove('is-search-hit', 'is-search-current', 'is-search-ancestor');
       });
     }
 
@@ -1843,6 +1849,23 @@ console.log('Studio ready');</textarea>
       }
     }
 
+    /**
+     * Mark the exact matching element with `matchClass`.
+     * Mark every ancestor .jt-node with `ancestorClass` (lighter colour).
+     * The match's own wrapping .jt-node also gets matchClass so CSS on .jt-node > .jt-node-head works.
+     */
+    function cdSearchMarkMatchAndAncestors(el, matchClass, ancestorClass) {
+      if (!el) return;
+      el.classList.add(matchClass);
+      const wrap = el.closest('.jt-node');
+      if (wrap) wrap.classList.add(matchClass);
+      let parent = wrap ? (wrap.parentElement ? wrap.parentElement.closest('.jt-node') : null) : null;
+      while (parent) {
+        parent.classList.add(ancestorClass);
+        parent = parent.parentElement ? parent.parentElement.closest('.jt-node') : null;
+      }
+    }
+
     function cdSearchApplyTree(id) {
       const st = cdSearchStates[id];
       cdSearchClearTreeHighlights(id);
@@ -1852,10 +1875,7 @@ console.log('Studio ready');</textarea>
       const hitEls = [];
       nodes.forEach(({ el, text }) => {
         if (text.toLowerCase().includes(needle)) {
-          el.classList.add('is-search-hit');
-          // mark the wrapping node too when it's a head
-          const wrap = el.closest('.jt-node');
-          if (wrap) wrap.classList.add('is-search-hit');
+          cdSearchMarkMatchAndAncestors(el, 'is-search-hit', 'is-search-ancestor');
           hitEls.push(el);
         }
       });
@@ -1864,9 +1884,8 @@ console.log('Studio ready');</textarea>
       if (hitEls.length) {
         if (st.current < 0 || st.current >= hitEls.length) st.current = 0;
         const cur = hitEls[st.current];
-        cur.classList.add('is-search-current');
-        const wrap = cur.closest('.jt-node');
-        if (wrap) wrap.classList.add('is-search-current');
+        // Current match uses stronger style; its ancestors stay light
+        cdSearchMarkMatchAndAncestors(cur, 'is-search-current', 'is-search-ancestor');
         cdSearchExpandAncestors(cur);
         cur.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       } else {
@@ -1927,15 +1946,9 @@ console.log('Studio ready');</textarea>
       const view = cdSearchGetView(id);
       if (view === 'Tree' && st._treeHits && st._treeHits.length) {
         cdSearchClearTreeHighlights(id);
-        st._treeHits.forEach(el => {
-          el.classList.add('is-search-hit');
-          const wrap = el.closest('.jt-node');
-          if (wrap) wrap.classList.add('is-search-hit');
-        });
+        st._treeHits.forEach(el => cdSearchMarkMatchAndAncestors(el, 'is-search-hit', 'is-search-ancestor'));
         const cur = st._treeHits[st.current];
-        cur.classList.add('is-search-current');
-        const wrap = cur.closest('.jt-node');
-        if (wrap) wrap.classList.add('is-search-current');
+        cdSearchMarkMatchAndAncestors(cur, 'is-search-current', 'is-search-ancestor');
         cdSearchExpandAncestors(cur);
         cur.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       } else {

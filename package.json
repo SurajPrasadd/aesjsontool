@@ -2,7 +2,7 @@
   "name": "aesjsonxml",
   "displayName": "AES JSON XML Tool",
   "description": "AES-128/192/256 encrypt & decrypt (ECB/CBC/CTR/CFB/OFB/GCM) plus a JSON & XML validator, beautifier, tree viewer, and side-by-side diff — all inside a VS Code webview panel.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "publisher": "SurajPrasad1993",
   "engines": {
     "vscode": "^1.136.0"
