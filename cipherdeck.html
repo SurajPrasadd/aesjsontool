@@ -422,7 +422,34 @@
       background: var(--bg-body); padding: 20px 24px 24px; box-sizing: border-box;
       display: flex; flex-direction: column; overflow: hidden;
     }
-    .cd-output-wrap.is-fullscreen .cd-output-head { flex: 0 0 auto }
+    .cd-output-wrap.is-fullscreen .cd-output-head {
+      flex: 0 0 auto;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    /* Expand / Collapse — clearer controls in fullscreen (only shown when Tree view is active via JS) */
+    .cd-output-wrap.is-fullscreen #doc1-tree-actions,
+    .cd-output-wrap.is-fullscreen #doc2-tree-actions,
+    .cd-output-wrap.is-fullscreen #jq-tree-actions {
+      gap: 10px;
+    }
+    .cd-output-wrap.is-fullscreen #doc1-tree-actions .card-action,
+    .cd-output-wrap.is-fullscreen #doc2-tree-actions .card-action,
+    .cd-output-wrap.is-fullscreen #jq-tree-actions .card-action {
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: var(--bg-muted);
+      border: 1px solid var(--border);
+    }
+    .cd-output-wrap.is-fullscreen #doc1-tree-actions .card-action:hover,
+    .cd-output-wrap.is-fullscreen #doc2-tree-actions .card-action:hover,
+    .cd-output-wrap.is-fullscreen #jq-tree-actions .card-action:hover {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
     .cd-output-wrap.is-fullscreen textarea,
     .cd-output-wrap.is-fullscreen .jt-tree,
     .cd-output-wrap.is-fullscreen .dw-diff,
@@ -1387,10 +1414,6 @@
             <span class="tab is-active" data-value="Text">Text</span>
             <span class="tab" data-value="Tree">Tree</span>
           </div>
-          <div class="cd-actions" id="jq-tree-actions" style="display:none; margin-left:8px;">
-            <button class="card-action cd-linklike" onclick="jqSetAllCollapsed(false)">Expand all</button>
-            <button class="card-action cd-linklike" onclick="jqSetAllCollapsed(true)">Collapse all</button>
-          </div>
           <div class="field" style="max-width:120px; margin-left:auto;">
             <select class="select" id="jq-indent" onchange="jqReformatNow()">
               <option value="2" selected>2 spaces</option><option value="4">4 spaces</option><option value="tab">Tab</option>
@@ -1406,6 +1429,10 @@
         <div class="cd-output-wrap" id="jq-output-wrap">
           <div class="cd-output-head">
             <div class="cd-output-head-left">
+              <div class="cd-actions" id="jq-tree-actions" style="display:none;">
+                <button class="card-action cd-linklike" onclick="jqSetAllCollapsed(false)">Expand all</button>
+                <button class="card-action cd-linklike" onclick="jqSetAllCollapsed(true)">Collapse all</button>
+              </div>
               <div class="cd-search" id="jq-search">
                 <input class="cd-search-input" id="jq-search-input" type="text" placeholder="Search…" autocomplete="off" spellcheck="false"
                   oninput="cdSearchQuery('jq')" onkeydown="cdSearchKey(event, 'jq')" />
@@ -2351,6 +2378,7 @@ console.log('Studio ready');</textarea>
         if (closeLine) closeLine.style.display = collapse ? 'none' : '';
         if (preview) preview.style.display = collapse ? '' : 'none';
       });
+      cdSearchRefresh(n);
     }
 
     function downloadText(filename, text) {
@@ -3050,6 +3078,7 @@ console.log('Studio ready');</textarea>
         if (closeLine) closeLine.style.display = collapse ? 'none' : '';
         if (preview) preview.style.display = collapse ? '' : 'none';
       });
+      cdSearchRefresh('jq');
     }
     function jqClear() {
       document.getElementById('jq-io').value = '';
