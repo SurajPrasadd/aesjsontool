@@ -572,6 +572,74 @@
     .jt-node-close { color: var(--t-base); font-weight: 600; padding: 1px 4px }
     .jt-node.is-collapsed>.jt-node-head { color: var(--t-muted) }
 
+    /* Editable tree values / keys */
+    .jt-val, .jt-key { cursor: text; border-radius: 3px; }
+    .jt-val:hover, .jt-key:hover { outline: 1px dashed color-mix(in oklab, var(--primary) 40%, transparent); }
+    .jt-edit-input {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--t-base);
+      background: var(--bg-muted);
+      border: 1px solid var(--primary);
+      border-radius: 4px;
+      padding: 1px 6px;
+      outline: none;
+      min-width: 40px;
+      max-width: min(480px, 70vw);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+    textarea.jt-edit-input {
+      width: min(520px, 80vw);
+      min-height: 72px;
+      max-height: 240px;
+      resize: vertical;
+      line-height: 1.45;
+      padding: 6px 8px;
+    }
+    .jt-edit-hint {
+      font-size: 10px;
+      color: var(--t-light);
+      margin-left: 8px;
+      font-family: Inter, sans-serif;
+      font-style: normal;
+      user-select: none;
+    }
+    .jt-leaf.is-editing, .jt-node-head.is-editing { background: var(--primary-soft); }
+    .jt-val.jt-editable, .jt-key.jt-editable, .jt-node-head.jt-editable-node {
+      cursor: text;
+    }
+    .jt-val.jt-editable:hover, .jt-key.jt-editable:hover {
+      outline: 1px dashed color-mix(in oklab, var(--primary) 45%, transparent);
+      border-radius: 3px;
+      background: color-mix(in oklab, var(--primary) 8%, transparent);
+    }
+    .jt-node-head.jt-editable-node:hover {
+      background: color-mix(in oklab, var(--primary) 6%, transparent);
+    }
+    .jt-edit-btn {
+      background: none;
+      border: 0;
+      cursor: pointer;
+      color: var(--t-light);
+      font-size: 11px;
+      padding: 0 4px;
+      margin-left: 4px;
+      border-radius: 4px;
+      line-height: 1;
+      opacity: 0;
+      transition: opacity .12s, color .12s, background .12s;
+    }
+    .jt-leaf:hover .jt-edit-btn,
+    .jt-node-head:hover .jt-edit-btn,
+    .jt-edit-btn:focus {
+      opacity: 1;
+    }
+    .jt-edit-btn:hover {
+      color: var(--primary);
+      background: var(--primary-soft);
+    }
+
     mark.dc-del { background: rgba(239,68,68,.35); color: inherit; text-decoration: line-through; border-radius: 2px; padding: 0 1px }
     mark.dc-add { background: rgba(16,185,129,.35); color: inherit; border-radius: 2px; padding: 0 1px }
 
@@ -712,6 +780,65 @@
       .hero { align-items: flex-start; flex-direction: column; gap: 20px }
       .cd-row, .kv-grid, .studio-grid { grid-template-columns: 1fr }
     }
+
+    /* Floating page scroll controls (bottom-right) */
+    .cd-scroll-fab {
+      position: fixed;
+      right: 20px;
+      bottom: 24px;
+      z-index: 250;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .cd-scroll-fab.is-visible {
+      display: flex;
+    }
+    .cd-scroll-fab.is-hidden-fs {
+      display: none !important;
+    }
+    .cd-scroll-fab .cd-scroll-btn {
+      pointer-events: auto;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      color: var(--t-muted);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: background .18s, color .18s, border-color .18s, transform .18s, box-shadow .18s;
+    }
+    .cd-scroll-fab .cd-scroll-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px -4px var(--primary-ring);
+    }
+    .cd-scroll-fab .cd-scroll-btn:active {
+      transform: translateY(0);
+    }
+    .cd-scroll-fab .cd-scroll-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .cd-scroll-fab .cd-scroll-btn:disabled {
+      opacity: .4;
+      pointer-events: none;
+    }
+    @media (max-width: 720px) {
+      .cd-scroll-fab { right: 14px; bottom: 16px; }
+      .cd-scroll-fab .cd-scroll-btn { width: 38px; height: 38px; border-radius: 10px; }
+    }
   </style>
 </head>
 
@@ -742,14 +869,6 @@
         <div class="cd-topbar">
           <div style="display:flex; align-items:center; gap:12px;">
             <span class="badge success dot">Runs locally · no data leaves your browser</span>
-            <label class="cd-theme-toggle" id="theme-toggle">
-              <svg id="theme-icon-sun" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-              </svg>
-              <span class="switch"><input type="checkbox" id="theme-switch" /><span class="track"></span></span>
-              <svg id="theme-icon-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" /></svg>
-            </label>
           </div>
         </div>
       </header>
@@ -941,12 +1060,12 @@
         <div class="cd-topbar">
           <div style="display:flex; align-items:center; gap:12px;">
             <span class="badge success dot">Runs locally · no data leaves your browser</span>
-            <label class="cd-theme-toggle" id="theme-toggle1">
+            <label class="cd-theme-toggle" id="theme-toggle">
               <svg id="theme-icon-sun" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="4" />
                 <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
               </svg>
-              <span class="switch"><input type="checkbox" id="theme-switch1" /><span class="track"></span></span>
+              <span class="switch"><input type="checkbox" id="theme-switch" /><span class="track"></span></span>
               <svg id="theme-icon-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" /></svg>
             </label>
           </div>
@@ -1476,8 +1595,8 @@
         <div class="hero-text">
           <span class="eyebrow">ENCODE / DECODE</span>
           <h1 class="hero-title">File <span class="accent">Converter</span></h1>
-          <p class="hero-sub">Convert between text, URL-encoding and Base64, turn images into Base64 (and back), and
-            convert PDF files to Base64 or Base64 back into a downloadable PDF.</p>
+          <p class="hero-sub">Convert between text, URL-encoding and Base64, images and PDFs to Base64 (and back),
+            and transform JSON ⇄ CSV — all client-side.</p>
         </div>
         <span class="badge success dot">Runs locally · no data leaves your browser</span>
       </header>
@@ -1486,6 +1605,8 @@
         <span class="tab is-active" data-value="text">Text / URL / Base64</span>
         <span class="tab" data-value="image">Image ⇄ Base64</span>
         <span class="tab" data-value="pdf">PDF ⇄ Base64</span>
+        <span class="tab" data-value="jsoncsv">JSON → CSV</span>
+        <span class="tab" data-value="csvjson">CSV → JSON</span>
       </div>
 
       <div class="conv-tool-panel" data-panel="text">
@@ -1590,6 +1711,163 @@
           </section>
         </div>
       </div>
+    
+
+      <div class="conv-tool-panel" data-panel="jsoncsv" style="display:none;">
+        <div class="cd-grid">
+        <section class="card">
+          <div class="card-head">
+            <div class="card-title-wrap"><span class="eyebrow">INPUT</span><h2 class="card-title">JSON</h2></div>
+            <span class="badge" id="j2c-status-badge">No input yet</span>
+          </div>
+
+          <div class="dw-toolbar-row" style="margin-bottom:10px;">
+            <label class="btn btn--ghost btn--sm" style="cursor:pointer;">Open<input type="file" id="j2c-file" accept=".json,application/json,text/plain" style="display:none;" onchange="j2cOpenFile(this)" /></label>
+            <button class="btn btn--ghost btn--sm" onclick="j2cClear()">Clear</button>
+            <button class="btn btn--ghost btn--sm" onclick="j2cSample()">Sample</button>
+          </div>
+
+          <textarea class="textarea mono" id="j2c-input" placeholder='Paste JSON here… e.g. [{"name":"Ada","age":36},{"name":"Grace","age":45}]' style="min-height:280px;" oninput="j2cConvert()"></textarea>
+
+          <div class="cd-row" style="margin-top:16px; margin-bottom:0;">
+            <div class="field">
+              <label class="field-label">Delimiter</label>
+              <select class="select" id="j2c-delim" onchange="j2cConvert()">
+                <option value="," selected>Comma (,)</option>
+                <option value=";">Semicolon (;)</option>
+                <option value="\t">Tab</option>
+                <option value="|">Pipe (|)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Nested objects</label>
+              <select class="select" id="j2c-nested" onchange="j2cConvert()">
+                <option value="flatten" selected>Flatten (dot keys)</option>
+                <option value="stringify">JSON-stringify</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:14px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+            <label class="switch">
+              <input type="checkbox" id="j2c-header" checked onchange="j2cConvert()" />
+              <span class="track"></span>
+              <span style="font-size:13px;">Include header row</span>
+            </label>
+            <button class="btn btn--primary btn--sm" onclick="j2cConvert()">Convert →</button>
+          </div>
+
+          <div class="alert danger" id="j2c-error" style="display:none; margin-top:14px;">
+            <div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg></div>
+            <div class="body"><div class="title">Can't convert</div><div id="j2c-error-text"></div></div>
+          </div>
+        </section>
+
+        <section class="card cd-panel-decrypt">
+          <div class="card-head">
+            <div class="card-title-wrap"><span class="eyebrow">OUTPUT</span><h2 class="card-title">CSV</h2></div>
+            <div class="cd-actions">
+              <button class="card-action cd-linklike" onclick="copyField('j2c-output')">Copy<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg></button>
+              <button class="card-action cd-linklike" onclick="j2cDownload()">Download<svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg></button>
+            </div>
+          </div>
+
+          <div class="jt-stats" style="display:flex; gap:24px; margin-bottom:12px;">
+            <div class="stat-cell"><span class="stat-cell-label">Rows</span><span class="stat-cell-value" id="j2c-stat-rows">0</span></div>
+            <div class="stat-cell"><span class="stat-cell-label">Columns</span><span class="stat-cell-value" id="j2c-stat-cols">0</span></div>
+            <div class="stat-cell"><span class="stat-cell-label">Characters</span><span class="stat-cell-value" id="j2c-stat-chars">0</span></div>
+          </div>
+
+          <textarea class="textarea mono" id="j2c-output" readonly placeholder="CSV output will appear here…" style="min-height:320px;"></textarea>
+        </section>
+      </div>
+      </div>
+
+      <div class="conv-tool-panel" data-panel="csvjson" style="display:none;">
+        <div class="cd-grid">
+        <section class="card">
+          <div class="card-head">
+            <div class="card-title-wrap"><span class="eyebrow">INPUT</span><h2 class="card-title">CSV</h2></div>
+            <span class="badge" id="c2j-status-badge">No input yet</span>
+          </div>
+
+          <div class="dw-toolbar-row" style="margin-bottom:10px;">
+            <label class="btn btn--ghost btn--sm" style="cursor:pointer;">Open<input type="file" id="c2j-file" accept=".csv,.tsv,text/csv,text/plain" style="display:none;" onchange="c2jOpenFile(this)" /></label>
+            <button class="btn btn--ghost btn--sm" onclick="c2jClear()">Clear</button>
+            <button class="btn btn--ghost btn--sm" onclick="c2jSample()">Sample</button>
+          </div>
+
+          <textarea class="textarea mono" id="c2j-input" placeholder="Paste CSV here… e.g.&#10;title,id,name,age&#10;User Details,1,John,25&#10;User Details,2,Sarah,28&#10;Product Details,101,Laptop," style="min-height:280px;" oninput="c2jConvert()"></textarea>
+
+          <div class="cd-row" style="margin-top:16px; margin-bottom:0;">
+            <div class="field">
+              <label class="field-label">Delimiter</label>
+              <select class="select" id="c2j-delim" onchange="c2jConvert()">
+                <option value="," selected>Comma (,)</option>
+                <option value=";">Semicolon (;)</option>
+                <option value="\t">Tab</option>
+                <option value="|">Pipe (|)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Output shape</label>
+              <select class="select" id="c2j-shape" onchange="c2jConvert()">
+                <option value="array" selected>Array of objects</option>
+                <option value="nested">Nested (title → items)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="cd-row" style="margin-top:12px; margin-bottom:0;">
+            <div class="field">
+              <label class="field-label">Title column <span class="cd-hint">(for nested shape)</span></label>
+              <input class="input mono" id="c2j-title-col" value="title" placeholder="title" oninput="c2jConvert()" />
+            </div>
+            <div class="field">
+              <label class="field-label">Root key <span class="cd-hint">(nested only)</span></label>
+              <input class="input mono" id="c2j-root-key" value="data" placeholder="data" oninput="c2jConvert()" />
+            </div>
+          </div>
+
+          <div style="margin-top:14px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+            <label class="switch">
+              <input type="checkbox" id="c2j-header" checked onchange="c2jConvert()" />
+              <span class="track"></span>
+              <span style="font-size:13px;">First row is header</span>
+            </label>
+            <label class="switch">
+              <input type="checkbox" id="c2j-parse-numbers" checked onchange="c2jConvert()" />
+              <span class="track"></span>
+              <span style="font-size:13px;">Parse numbers</span>
+            </label>
+            <button class="btn btn--primary btn--sm" onclick="c2jConvert()">Convert →</button>
+          </div>
+
+          <div class="alert danger" id="c2j-error" style="display:none; margin-top:14px;">
+            <div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg></div>
+            <div class="body"><div class="title">Can't convert</div><div id="c2j-error-text"></div></div>
+          </div>
+        </section>
+
+        <section class="card cd-panel-decrypt">
+          <div class="card-head">
+            <div class="card-title-wrap"><span class="eyebrow">OUTPUT</span><h2 class="card-title">JSON</h2></div>
+            <div class="cd-actions">
+              <button class="card-action cd-linklike" onclick="copyField('c2j-output')">Copy<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a2 2 0 0 1 2-2h10" /></svg></button>
+              <button class="card-action cd-linklike" onclick="c2jDownload()">Download<svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg></button>
+            </div>
+          </div>
+
+          <div class="jt-stats" style="display:flex; gap:24px; margin-bottom:12px;">
+            <div class="stat-cell"><span class="stat-cell-label">Rows</span><span class="stat-cell-value" id="c2j-stat-rows">0</span></div>
+            <div class="stat-cell"><span class="stat-cell-label">Columns</span><span class="stat-cell-value" id="c2j-stat-cols">0</span></div>
+            <div class="stat-cell"><span class="stat-cell-label">Characters</span><span class="stat-cell-value" id="c2j-stat-chars">0</span></div>
+          </div>
+
+          <textarea class="textarea mono" id="c2j-output" readonly placeholder="JSON output will appear here…" style="min-height:320px;"></textarea>
+        </section>
+      </div>
+      </div>
     </div>
 
     <!-- ============ HTML/CSS/JS STUDIO PANEL ============ -->
@@ -1678,31 +1956,38 @@ console.log('Studio ready');</textarea>
     </div>
 
     <div class="cd-footer">
-      <p>AES-128 / 192 / 256 · JWT · Epoch &amp; Time · JSON &amp; XML Workbench with compare · Base64 / URL / PDF ·
+      <p>AES-128 / 192 / 256 · JWT · Epoch &amp; Time · JSON &amp; XML Workbench with compare · JSON → CSV · CSV → JSON · Base64 / URL / PDF ·
         HTML/CSS/JS Studio · WebCrypto + CryptoJS · no network calls, no logging</p>
     </div>
 
   </div>
 
+  <!-- Floating page scroll: up / down -->
+  <div class="cd-scroll-fab" id="cd-scroll-fab" aria-hidden="true">
+    <button type="button" class="cd-scroll-btn" id="cd-scroll-up" title="Hold to scroll up" aria-label="Scroll up"
+      onmousedown="cdScrollHoldStart('up', event)" onmouseup="cdScrollHoldStop()" onmouseleave="cdScrollHoldStop()"
+      ontouchstart="cdScrollHoldStart('up', event)" ontouchend="cdScrollHoldStop()" ontouchcancel="cdScrollHoldStop()">
+      <svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+    </button>
+    <button type="button" class="cd-scroll-btn" id="cd-scroll-down" title="Hold to scroll down" aria-label="Scroll down"
+      onmousedown="cdScrollHoldStart('down', event)" onmouseup="cdScrollHoldStop()" onmouseleave="cdScrollHoldStop()"
+      ontouchstart="cdScrollHoldStart('down', event)" ontouchend="cdScrollHoldStop()" ontouchcancel="cdScrollHoldStop()">
+      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+    </button>
+  </div>
+
   <script>
     /* ---------------- theme ---------------- */
     const themeSwitch = document.getElementById('theme-switch');
-    const themeSwitch1 = document.getElementById('theme-switch1');
     function applyTheme(isDark) {
       document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
       themeSwitch.checked = isDark;
-      themeSwitch1.checked = isDark;
     }
     (function initTheme() { applyTheme(false); })();
     document.getElementById('theme-toggle').addEventListener('click', (e) => {
       e.preventDefault();
       applyTheme(!(document.documentElement.getAttribute('data-theme') === 'dark'));
     });
-    document.getElementById('theme-toggle1').addEventListener('click', (e) => {
-      e.preventDefault();
-      applyTheme(!(document.documentElement.getAttribute('data-theme') === 'dark'));
-    });
-
     /* ---------------- top-level tool tabs ---------------- */
     (function wireToolTabs() {
       const tabs = document.querySelectorAll('#tool-tabs .tab');
@@ -1765,6 +2050,7 @@ console.log('Studio ready');</textarea>
       const docMatch = wrapId.match(/^doc(\d)-output-wrap$/);
       if (docMatch) jtSwitchView(Number(docMatch[1]), docState[Number(docMatch[1])].view);
       if (wrapId === 'jq-output-wrap') jqSwitchView(jqView);
+      if (typeof cdUpdateScrollFab === 'function') cdUpdateScrollFab();
     }
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
@@ -1773,6 +2059,83 @@ console.log('Studio ready');</textarea>
         cdToggleFullscreen(wrap.id, iconId);
       });
     });
+
+    /* ---------------- floating page scroll controls ---------------- */
+    function cdIsAnyFullscreen() {
+      return !!document.querySelector('.cd-output-wrap.is-fullscreen');
+    }
+    let _cdScrollHoldRaf = null;
+    let _cdScrollHoldDir = null;
+    let _cdScrollHoldLast = 0;
+
+    function cdScrollHoldStop() {
+      _cdScrollHoldDir = null;
+      if (_cdScrollHoldRaf != null) {
+        cancelAnimationFrame(_cdScrollHoldRaf);
+        _cdScrollHoldRaf = null;
+      }
+    }
+
+    function cdScrollHoldTick(ts) {
+      if (!_cdScrollHoldDir) {
+        _cdScrollHoldRaf = null;
+        return;
+      }
+      if (!_cdScrollHoldLast) _cdScrollHoldLast = ts;
+      const dt = Math.min(48, ts - _cdScrollHoldLast);
+      _cdScrollHoldLast = ts;
+      // ~1100 px/s continuous scroll while held
+      const speed = 1.1 * dt;
+      const maxY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const current = window.scrollY || window.pageYOffset || 0;
+      let next = _cdScrollHoldDir === 'up' ? current - speed : current + speed;
+      if (next < 0) next = 0;
+      if (next > maxY) next = maxY;
+      window.scrollTo(0, next);
+      if ((next <= 0 && _cdScrollHoldDir === 'up') || (next >= maxY && _cdScrollHoldDir === 'down')) {
+        cdScrollHoldStop();
+        cdUpdateScrollFab();
+        return;
+      }
+      _cdScrollHoldRaf = requestAnimationFrame(cdScrollHoldTick);
+    }
+
+    function cdScrollHoldStart(dir, ev) {
+      if (ev) {
+        ev.preventDefault();
+        if (ev.type === 'mousedown' && ev.button !== 0) return;
+      }
+      cdScrollHoldStop();
+      _cdScrollHoldDir = dir;
+      _cdScrollHoldLast = 0;
+      _cdScrollHoldRaf = requestAnimationFrame(cdScrollHoldTick);
+    }
+
+    // Safety: stop hold-scroll on window blur / any mouseup outside
+    window.addEventListener('mouseup', cdScrollHoldStop);
+    window.addEventListener('blur', cdScrollHoldStop);
+    window.addEventListener('touchend', cdScrollHoldStop, { passive: true });
+
+    function cdUpdateScrollFab() {
+      const fab = document.getElementById('cd-scroll-fab');
+      if (!fab) return;
+      const scrolled = window.scrollY > 180;
+      const fs = cdIsAnyFullscreen();
+      fab.classList.toggle('is-visible', scrolled && !fs);
+      fab.classList.toggle('is-hidden-fs', fs);
+      fab.setAttribute('aria-hidden', (scrolled && !fs) ? 'false' : 'true');
+      if (fs) cdScrollHoldStop();
+      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      const nearTop = window.scrollY < 40;
+      const nearBottom = window.scrollY >= maxScroll - 40;
+      const upBtn = document.getElementById('cd-scroll-up');
+      const downBtn = document.getElementById('cd-scroll-down');
+      if (upBtn) upBtn.disabled = nearTop;
+      if (downBtn) downBtn.disabled = nearBottom || maxScroll < 40;
+    }
+    window.addEventListener('scroll', cdUpdateScrollFab, { passive: true });
+    window.addEventListener('resize', cdUpdateScrollFab);
+    cdUpdateScrollFab();
 
     /* ---------------- copy (shared) ---------------- */
     function copyField(id) {
@@ -2360,10 +2723,13 @@ console.log('Studio ready');</textarea>
       try {
         if (docLastResult[n].format === 'JSON') {
           const data = JSON.parse(docLastResult[n].text);
-          container.appendChild(jtJsonNode(data, null, false));
+          jtTreeRoots[n] = data;
+          const ctx = { source: n, root: data, path: [], readOnly: false };
+          container.appendChild(jtJsonNode(data, null, false, ctx));
         } else {
           const doc = new DOMParser().parseFromString(docLastResult[n].text, 'application/xml');
-          container.appendChild(jtXmlNode(doc.documentElement));
+          const ctx = { source: n, xmlDoc: doc, readOnly: false };
+          container.appendChild(jtXmlNode(doc.documentElement, ctx));
         }
       } catch (e) {
         const err = document.createElement('div');
@@ -2476,41 +2842,306 @@ console.log('Studio ready');</textarea>
       });
     }
 
-    function jtJsonNode(value, key, isArrayIndex) {
+    /* ---- Editable JSON tree ----
+       ctx = {
+         source: 'doc1' | 'doc2' | 'jq',
+         root: <object>,          // live root reference
+         path: [],                // path from root to this node
+         readOnly: false
+       }
+    */
+    const jtTreeRoots = { 1: null, 2: null, jq: null };
+
+    function jtPathGet(root, path) {
+      let cur = root;
+      for (const p of path) {
+        if (cur == null) return undefined;
+        cur = cur[p];
+      }
+      return cur;
+    }
+    function jtPathSet(root, path, value) {
+      if (!path.length) return value;
+      let cur = root;
+      for (let i = 0; i < path.length - 1; i++) cur = cur[path[i]];
+      cur[path[path.length - 1]] = value;
+      return root;
+    }
+    function jtPathDelete(root, path) {
+      if (!path.length) return root;
+      let cur = root;
+      for (let i = 0; i < path.length - 1; i++) cur = cur[path[i]];
+      const last = path[path.length - 1];
+      if (Array.isArray(cur) && typeof last === 'number') cur.splice(last, 1);
+      else delete cur[last];
+      return root;
+    }
+    function jtPathRenameKey(root, path, oldKey, newKey) {
+      if (oldKey === newKey) return root;
+      let parent = root;
+      const parentPath = path.slice(0, -1);
+      for (const p of parentPath) parent = parent[p];
+      if (!parent || Array.isArray(parent) || typeof parent !== 'object') return root;
+      if (Object.prototype.hasOwnProperty.call(parent, newKey)) {
+        alert('Key "' + newKey + '" already exists on this object.');
+        return root;
+      }
+      // Preserve key order
+      const next = {};
+      Object.keys(parent).forEach(k => {
+        if (k === oldKey) next[newKey] = parent[k];
+        else next[k] = parent[k];
+      });
+      Object.keys(parent).forEach(k => delete parent[k]);
+      Object.keys(next).forEach(k => { parent[k] = next[k]; });
+      return root;
+    }
+
+    function jtParseEditedValue(raw) {
+      const s = raw.trim();
+      if (s === 'null') return null;
+      if (s === 'true') return true;
+      if (s === 'false') return false;
+      if (s === '') return '';
+      // quoted string
+      if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+        try { return JSON.parse(s.startsWith("'") ? '"' + s.slice(1, -1).replace(/"/g, '\\"') + '"' : s); }
+        catch (e) { return s.slice(1, -1); }
+      }
+      // number
+      if (/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(s)) {
+        const n = Number(s);
+        if (!isNaN(n) && isFinite(n)) return n;
+      }
+      // try JSON (object/array)
+      if ((s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'))) {
+        try { return JSON.parse(s); } catch (e) { /* fall through */ }
+      }
+      // bare string
+      return s;
+    }
+
+    function jtFormatValueDisplay(value) {
+      if (value === null) return 'null';
+      if (typeof value === 'string') return JSON.stringify(value);
+      if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+      return String(value);
+    }
+
+    function jtValueClass(value) {
+      if (value === null) return 'jt-val jt-null';
+      if (typeof value === 'string') return 'jt-val jt-string';
+      if (typeof value === 'number') return 'jt-val jt-number';
+      if (typeof value === 'boolean') return 'jt-val jt-bool';
+      return 'jt-val';
+    }
+
+    function jtCommitTree(source) {
+      const root = jtTreeRoots[source];
+      if (root === undefined) return;
+      if (source === 'jq') {
+        jqLastValid = root;
+        const formatted = JSON.stringify(root, null, jqIndentString());
+        const io = document.getElementById('jq-io');
+        if (io) io.value = formatted;
+        const badge = document.getElementById('jq-status-badge');
+        if (badge) { badge.textContent = 'Valid'; badge.className = 'badge success'; }
+        const errBox = document.getElementById('jq-error');
+        if (errBox) errBox.style.display = 'none';
+        jqRenderTree();
+        return;
+      }
+      // doc 1 or 2
+      const n = source;
+      const indent = jtIndentString(n);
+      const formatted = JSON.stringify(root, null, indent);
+      el(n, 'output').value = formatted;
+      jtUpdateStats(n, formatted);
+      docLastResult[n] = { format: 'JSON', text: formatted };
+      el(n, 'input').value = formatted;
+      jtShowSuccess(n, 'Edited', 'Tree edit applied — output & input updated.');
+      jtRenderTree(n);
+    }
+
+    function jtStartEdit(span, initialText, onCommit, opts) {
+      opts = opts || {};
+      if (span._jtEditing) return;
+      span._jtEditing = true;
+      const parent = span.parentElement;
+      if (parent) parent.classList.add('is-editing');
+
+      const multiline = !!opts.multiline;
+      const input = document.createElement(multiline ? 'textarea' : 'input');
+      if (!multiline) input.type = 'text';
+      input.className = 'jt-edit-input';
+      input.value = initialText;
+      input.setAttribute('spellcheck', 'false');
+      input.setAttribute('autocomplete', 'off');
+      if (multiline) input.rows = Math.min(12, Math.max(3, String(initialText).split('\n').length + 1));
+
+      let finished = false;
+      const finish = (save) => {
+        if (finished || !span._jtEditing) return;
+        finished = true;
+        span._jtEditing = false;
+        if (parent) parent.classList.remove('is-editing');
+        const val = input.value;
+        if (input.parentNode) input.parentNode.replaceChild(span, input);
+        if (save) onCommit(val);
+      };
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { e.preventDefault(); finish(false); }
+        else if (e.key === 'Enter' && !multiline) { e.preventDefault(); finish(true); }
+        else if (e.key === 'Enter' && multiline && (e.ctrlKey || e.metaKey)) { e.preventDefault(); finish(true); }
+        e.stopPropagation();
+      });
+      input.addEventListener('blur', () => finish(true));
+      input.addEventListener('click', (e) => e.stopPropagation());
+      input.addEventListener('mousedown', (e) => e.stopPropagation());
+
+      span.parentNode.replaceChild(input, span);
+      input.focus();
+      if (opts.selectAll !== false) input.select();
+    }
+
+    function jtMakeEditBtn(title, onClick) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'jt-edit-btn';
+      btn.title = title;
+      btn.textContent = '✎';
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick(e);
+      });
+      return btn;
+    }
+
+    function jtJsonNode(value, key, isArrayIndex, ctx) {
+      ctx = ctx || { source: null, root: null, path: [], readOnly: true };
+      const path = ctx.path || [];
+      const editable = !ctx.readOnly && ctx.source != null;
+
       const wrap = document.createElement('div');
       wrap.className = 'jt-node';
       const isArr = Array.isArray(value);
       const isObj = value !== null && typeof value === 'object';
+
+      const attachKeyRename = (keySpan, rawKey) => {
+        if (!editable || isArrayIndex) return;
+        keySpan.classList.add('jt-editable');
+        keySpan.title = 'Double-click to rename key';
+        const doRename = () => {
+          jtStartEdit(keySpan, String(rawKey), (newRaw) => {
+            const newKey = newRaw.trim();
+            if (!newKey || newKey === String(rawKey)) {
+              keySpan.textContent = JSON.stringify(String(rawKey)) + ': ';
+              return;
+            }
+            jtPathRenameKey(ctx.root, path, String(rawKey), newKey);
+            jtCommitTree(ctx.source);
+          });
+        };
+        keySpan.addEventListener('dblclick', (e) => {
+          e.preventDefault(); e.stopPropagation();
+          doRename();
+        });
+      };
+
       if (isObj) {
         const entries = isArr ? value.map((v, i) => [i, v]) : Object.entries(value);
         const head = document.createElement('div');
         head.className = 'jt-node-head';
+        if (editable) head.classList.add('jt-editable-node');
+
         const toggle = document.createElement('button');
         toggle.type = 'button'; toggle.className = 'jt-toggle'; toggle.textContent = '▾';
         head.appendChild(toggle);
+
         if (key !== null) {
           const keySpan = document.createElement('span');
           keySpan.className = isArrayIndex ? 'jt-index' : 'jt-key';
-          keySpan.textContent = (isArrayIndex ? key : JSON.stringify(String(key))) + ': ';
+          if (isArrayIndex) {
+            keySpan.textContent = key + ': ';
+          } else {
+            keySpan.textContent = JSON.stringify(String(key)) + ': ';
+            attachKeyRename(keySpan, key);
+          }
           head.appendChild(keySpan);
         }
+
         const openSpan = document.createElement('span');
         openSpan.className = 'jt-bracket';
         openSpan.textContent = isArr ? '[' : '{';
         head.appendChild(openSpan);
+
         const countSpan = document.createElement('span');
         countSpan.className = 'jt-count';
         countSpan.textContent = entries.length + (isArr ? (entries.length === 1 ? ' item' : ' items') : (entries.length === 1 ? ' key' : ' keys'));
         head.appendChild(countSpan);
+
         const previewSpan = document.createElement('span');
         previewSpan.className = 'jt-preview';
         previewSpan.style.display = 'none';
         previewSpan.textContent = ' … ' + (isArr ? ']' : '}');
         head.appendChild(previewSpan);
+
+        // Edit entire sub-node (object / array) as JSON
+        if (editable) {
+          const editSubtree = () => {
+            const initial = JSON.stringify(value, null, 2);
+            // Replace the count span temporarily as the edit target anchor
+            jtStartEdit(countSpan, initial, (newRaw) => {
+              try {
+                const parsed = JSON.parse(newRaw);
+                if (!path.length) {
+                  // Root replacement
+                  jtTreeRoots[ctx.source] = parsed;
+                  if (ctx.source === 'jq') {
+                    // root handled in commit via jtTreeRoots
+                  }
+                } else {
+                  jtPathSet(ctx.root, path, parsed);
+                }
+                // If path empty, root object reference must update
+                if (!path.length) {
+                  // Replace root in place when possible
+                  if (ctx.source === 'jq') {
+                    jtTreeRoots.jq = parsed;
+                  } else {
+                    jtTreeRoots[ctx.source] = parsed;
+                  }
+                }
+                jtCommitTree(ctx.source);
+              } catch (err) {
+                alert('Invalid JSON: ' + err.message);
+                countSpan.textContent = entries.length + (isArr ? (entries.length === 1 ? ' item' : ' items') : (entries.length === 1 ? ' key' : ' keys'));
+              }
+            }, { multiline: true, selectAll: true });
+          };
+          countSpan.title = 'Double-click to edit this object/array as JSON';
+          countSpan.style.cursor = 'text';
+          countSpan.addEventListener('dblclick', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            editSubtree();
+          });
+          head.appendChild(jtMakeEditBtn('Edit this node as JSON', editSubtree));
+        }
+
         wrap.appendChild(head);
         const children = document.createElement('div');
         children.className = 'jt-children';
-        entries.forEach(([k, v]) => children.appendChild(jtJsonNode(v, k, isArr)));
+        entries.forEach(([k, v]) => {
+          const childCtx = {
+            source: ctx.source,
+            root: ctx.root,
+            path: path.concat([k]),
+            readOnly: ctx.readOnly
+          };
+          children.appendChild(jtJsonNode(v, k, isArr, childCtx));
+        });
         wrap.appendChild(children);
         const closeLine = document.createElement('div');
         closeLine.className = 'jt-node-close';
@@ -2527,22 +3158,51 @@ console.log('Studio ready');</textarea>
         if (key !== null) {
           const keySpan = document.createElement('span');
           keySpan.className = isArrayIndex ? 'jt-index' : 'jt-key';
-          keySpan.textContent = (isArrayIndex ? key : JSON.stringify(String(key))) + ': ';
+          if (isArrayIndex) {
+            keySpan.textContent = key + ': ';
+          } else {
+            keySpan.textContent = JSON.stringify(String(key)) + ': ';
+            attachKeyRename(keySpan, key);
+          }
           line.appendChild(keySpan);
         }
         const valSpan = document.createElement('span');
-        if (value === null) { valSpan.className = 'jt-val jt-null'; valSpan.textContent = 'null'; }
-        else if (typeof value === 'string') { valSpan.className = 'jt-val jt-string'; valSpan.textContent = JSON.stringify(value); }
-        else if (typeof value === 'number') { valSpan.className = 'jt-val jt-number'; valSpan.textContent = String(value); }
-        else if (typeof value === 'boolean') { valSpan.className = 'jt-val jt-bool'; valSpan.textContent = String(value); }
-        else { valSpan.className = 'jt-val'; valSpan.textContent = String(value); }
-        line.appendChild(valSpan);
+        valSpan.className = jtValueClass(value);
+        valSpan.textContent = jtFormatValueDisplay(value);
+        if (editable) {
+          valSpan.classList.add('jt-editable');
+          valSpan.title = 'Double-click to edit value';
+          const editValue = () => {
+            let initial;
+            if (typeof value === 'string') initial = value;
+            else if (value === null) initial = 'null';
+            else initial = String(value);
+            jtStartEdit(valSpan, initial, (newRaw) => {
+              const parsed = jtParseEditedValue(newRaw);
+              if (!path.length) {
+                jtTreeRoots[ctx.source] = parsed;
+              } else {
+                jtPathSet(ctx.root, path, parsed);
+              }
+              jtCommitTree(ctx.source);
+            });
+          };
+          valSpan.addEventListener('dblclick', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            editValue();
+          });
+          line.appendChild(valSpan);
+          line.appendChild(jtMakeEditBtn('Edit value', editValue));
+        } else {
+          line.appendChild(valSpan);
+        }
         wrap.appendChild(line);
       }
       return wrap;
     }
 
-    function jtXmlNode(elNode) {
+function jtXmlNode(elNode, ctx) {
+      ctx = ctx || { readOnly: true };
       const wrap = document.createElement('div');
       wrap.className = 'jt-node';
       const childElements = Array.from(elNode.children || []);
@@ -2570,6 +3230,21 @@ console.log('Studio ready');</textarea>
         const txt = document.createElement('span');
         txt.className = 'jt-val jt-string';
         txt.textContent = textContent;
+        // XML text edit: update the live DOM node text and serialize back
+        if (ctx && !ctx.readOnly && ctx.source != null && ctx.xmlDoc) {
+          txt.title = 'Double-click to edit text';
+          txt.addEventListener('dblclick', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            jtStartEdit(txt, textContent, (newRaw) => {
+              // Replace all text nodes under this element with the new text
+              Array.from(elNode.childNodes).forEach(nd => {
+                if (nd.nodeType === 3) elNode.removeChild(nd);
+              });
+              elNode.appendChild(ctx.xmlDoc.createTextNode(newRaw));
+              jtCommitXmlTree(ctx.source, ctx.xmlDoc);
+            });
+          });
+        }
         head.appendChild(txt);
         const closeTag = document.createElement('span');
         closeTag.className = 'jt-tag';
@@ -2592,7 +3267,7 @@ console.log('Studio ready');</textarea>
       if (hasChildren) {
         const children = document.createElement('div');
         children.className = 'jt-children';
-        childElements.forEach(childEl => children.appendChild(jtXmlNode(childEl)));
+        childElements.forEach(childEl => children.appendChild(jtXmlNode(childEl, ctx)));
         wrap.appendChild(children);
         const closeLine = document.createElement('div');
         closeLine.className = 'jt-node-close';
@@ -2604,7 +3279,23 @@ console.log('Studio ready');</textarea>
       return wrap;
     }
 
-    /* =========================================================================
+    function jtCommitXmlTree(n, xmlDoc) {
+      try {
+        const serializer = new XMLSerializer();
+        const raw = serializer.serializeToString(xmlDoc);
+        const formatted = jtBeautifyXML(raw, jtIndentString(n));
+        el(n, 'output').value = formatted;
+        jtUpdateStats(n, formatted);
+        docLastResult[n] = { format: 'XML', text: formatted };
+        el(n, 'input').value = formatted;
+        jtShowSuccess(n, 'Edited', 'Tree edit applied — output updated.');
+        jtRenderTree(n);
+      } catch (e) {
+        jtShowError(n, 'Failed to apply XML edit: ' + e.message);
+      }
+    }
+
+        /* =========================================================================
        Shared diff engine
        ========================================================================= */
     function lcsDiff(a, b) {
@@ -3071,7 +3762,11 @@ console.log('Studio ready');</textarea>
         cdSearchRefresh('jq');
         return;
       }
-      container.appendChild(jtJsonNode(jqLastValid, null, false));
+      // Deep-clone so tree edits mutate a stable root we own
+      const data = JSON.parse(JSON.stringify(jqLastValid));
+      jtTreeRoots.jq = data;
+      const ctx = { source: 'jq', root: data, path: [], readOnly: false };
+      container.appendChild(jtJsonNode(data, null, false, ctx));
       cdSearchRefresh('jq');
     }
     function jqSetAllCollapsed(collapse) {
@@ -3102,6 +3797,499 @@ console.log('Studio ready');</textarea>
       const reader = new FileReader();
       reader.onload = () => { document.getElementById('jq-io').value = reader.result; jqFormat(); jqReformatNow(); };
       reader.readAsText(file);
+    }
+
+    /* =========================================================================
+       JSON → CSV
+       ========================================================================= */
+    function j2cEscapeCell(val, delim) {
+      if (val === null || val === undefined) return '';
+      const s = String(val);
+      if (s.includes('"') || s.includes(delim) || s.includes('\n') || s.includes('\r')) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    }
+
+    function j2cFlatten(obj, prefix, out) {
+      out = out || {};
+      if (obj === null || obj === undefined) {
+        if (prefix) out[prefix] = '';
+        return out;
+      }
+      if (typeof obj !== 'object') {
+        out[prefix || 'value'] = obj;
+        return out;
+      }
+      if (Array.isArray(obj)) {
+        out[prefix || 'value'] = JSON.stringify(obj);
+        return out;
+      }
+      const keys = Object.keys(obj);
+      if (!keys.length) {
+        if (prefix) out[prefix] = '';
+        return out;
+      }
+      keys.forEach(k => {
+        const path = prefix ? prefix + '.' + k : k;
+        const v = obj[k];
+        if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
+          j2cFlatten(v, path, out);
+        } else if (Array.isArray(v)) {
+          out[path] = JSON.stringify(v);
+        } else {
+          out[path] = v;
+        }
+      });
+      return out;
+    }
+
+    /**
+   * Detects shapes like:
+   *   { "data": [ { "title": "...", "items": [ {...}, ... ] }, ... ] }
+   * or a bare array of { title, items }.
+   * Expands each item into a CSV row with a "title" column + the item's fields.
+   */
+    function j2cTryExpandTitleItems(parsed) {
+      let sections = null;
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && Array.isArray(parsed.data)) {
+        sections = parsed.data;
+      } else if (Array.isArray(parsed)) {
+        sections = parsed;
+      }
+      if (!sections || !sections.length) return null;
+      const looksLike = sections.every(s =>
+        s && typeof s === 'object' && !Array.isArray(s) &&
+        typeof s.title === 'string' && Array.isArray(s.items)
+      );
+      if (!looksLike) return null;
+
+      const headerSet = ['title'];
+      const seen = new Set(['title']);
+      const flatRows = [];
+      sections.forEach(sec => {
+        (sec.items || []).forEach(item => {
+          if (item === null || typeof item !== 'object' || Array.isArray(item)) {
+            const row = { title: sec.title, value: item };
+            if (!seen.has('value')) { seen.add('value'); headerSet.push('value'); }
+            flatRows.push(row);
+            return;
+          }
+          const row = { title: sec.title };
+          Object.keys(item).forEach(k => {
+            if (!seen.has(k)) { seen.add(k); headerSet.push(k); }
+            const v = item[k];
+            row[k] = (v !== null && typeof v === 'object') ? JSON.stringify(v) : v;
+          });
+          flatRows.push(row);
+        });
+      });
+      const rows = flatRows.map(row => headerSet.map(h => (row[h] !== undefined ? row[h] : '')));
+      return { headers: headerSet, rows };
+    }
+
+    function j2cNormalizeRows(parsed, nestedMode) {
+      // Returns { headers: string[], rows: any[][] }
+      if (parsed === null || parsed === undefined) {
+        return { headers: [], rows: [] };
+      }
+
+      // Prefer the title/items expansion when the shape matches (works in both flatten & stringify modes)
+      const expanded = j2cTryExpandTitleItems(parsed);
+      if (expanded) return expanded;
+
+      // Array of primitives → single column
+      if (Array.isArray(parsed) && parsed.every(v => v === null || typeof v !== 'object')) {
+        return {
+          headers: ['value'],
+          rows: parsed.map(v => [v])
+        };
+      }
+
+      // Array of arrays → numbered columns
+      if (Array.isArray(parsed) && parsed.length && Array.isArray(parsed[0])) {
+        const maxLen = Math.max(...parsed.map(r => r.length));
+        const headers = Array.from({ length: maxLen }, (_, i) => 'col' + (i + 1));
+        const rows = parsed.map(r => {
+          const row = [];
+          for (let i = 0; i < maxLen; i++) row.push(r[i] !== undefined ? r[i] : '');
+          return row;
+        });
+        return { headers, rows };
+      }
+
+      // Single object
+      if (!Array.isArray(parsed) && typeof parsed === 'object') {
+        parsed = [parsed];
+      }
+
+      if (!Array.isArray(parsed)) {
+        throw new Error('JSON must be an object, an array of objects, or an array of values.');
+      }
+
+      const flatRows = parsed.map(item => {
+        if (item === null || typeof item !== 'object' || Array.isArray(item)) {
+          return nestedMode === 'flatten'
+            ? j2cFlatten({ value: item })
+            : { value: item === null || typeof item !== 'object' ? item : JSON.stringify(item) };
+        }
+        if (nestedMode === 'flatten') return j2cFlatten(item);
+        // stringify nested
+        const row = {};
+        Object.keys(item).forEach(k => {
+          const v = item[k];
+          row[k] = (v !== null && typeof v === 'object') ? JSON.stringify(v) : v;
+        });
+        return row;
+      });
+
+      // Union of all keys (stable order: first-seen)
+      const headerSet = [];
+      const seen = new Set();
+      flatRows.forEach(row => {
+        Object.keys(row).forEach(k => {
+          if (!seen.has(k)) { seen.add(k); headerSet.push(k); }
+        });
+      });
+
+      const rows = flatRows.map(row => headerSet.map(h => (row[h] !== undefined ? row[h] : '')));
+      return { headers: headerSet, rows };
+    }
+
+    function j2cConvert() {
+      const raw = document.getElementById('j2c-input').value.trim();
+      const errBox = document.getElementById('j2c-error');
+      const errText = document.getElementById('j2c-error-text');
+      const badge = document.getElementById('j2c-status-badge');
+      const outEl = document.getElementById('j2c-output');
+      errBox.style.display = 'none';
+
+      if (!raw) {
+        outEl.value = '';
+        document.getElementById('j2c-stat-rows').textContent = '0';
+        document.getElementById('j2c-stat-cols').textContent = '0';
+        document.getElementById('j2c-stat-chars').textContent = '0';
+        badge.textContent = 'No input yet';
+        badge.className = 'badge';
+        return;
+      }
+
+      let parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch (e) {
+        errText.textContent = e.message;
+        errBox.style.display = 'grid';
+        outEl.value = '';
+        badge.textContent = 'Invalid JSON';
+        badge.className = 'badge danger';
+        document.getElementById('j2c-stat-rows').textContent = '0';
+        document.getElementById('j2c-stat-cols').textContent = '0';
+        document.getElementById('j2c-stat-chars').textContent = '0';
+        return;
+      }
+
+      try {
+        let delim = document.getElementById('j2c-delim').value;
+        if (delim === '\\t') delim = '\t';
+        const nestedMode = document.getElementById('j2c-nested').value;
+        const includeHeader = document.getElementById('j2c-header').checked;
+        const { headers, rows } = j2cNormalizeRows(parsed, nestedMode);
+
+        if (!headers.length && !rows.length) {
+          outEl.value = '';
+          badge.textContent = 'Empty';
+          badge.className = 'badge';
+          document.getElementById('j2c-stat-rows').textContent = '0';
+          document.getElementById('j2c-stat-cols').textContent = '0';
+          document.getElementById('j2c-stat-chars').textContent = '0';
+          return;
+        }
+
+        const lines = [];
+        if (includeHeader) {
+          lines.push(headers.map(h => j2cEscapeCell(h, delim)).join(delim));
+        }
+        rows.forEach(row => {
+          lines.push(row.map(cell => j2cEscapeCell(cell, delim)).join(delim));
+        });
+
+        const csv = lines.join('\n');
+        outEl.value = csv;
+        document.getElementById('j2c-stat-rows').textContent = (includeHeader ? rows.length + 1 : rows.length).toLocaleString();
+        document.getElementById('j2c-stat-cols').textContent = headers.length.toLocaleString();
+        document.getElementById('j2c-stat-chars').textContent = csv.length.toLocaleString();
+        badge.textContent = 'Converted';
+        badge.className = 'badge success';
+      } catch (e) {
+        errText.textContent = e.message || String(e);
+        errBox.style.display = 'grid';
+        outEl.value = '';
+        badge.textContent = 'Error';
+        badge.className = 'badge danger';
+      }
+    }
+
+    function j2cClear() {
+      document.getElementById('j2c-input').value = '';
+      j2cConvert();
+    }
+
+    function j2cSample() {
+      // Nested title/items shape — expands to title + item columns
+      document.getElementById('j2c-input').value = JSON.stringify({
+        data: [
+          {
+            title: 'User Details',
+            items: [
+              { id: 1, name: 'John', age: 25 },
+              { id: 2, name: 'Sarah', age: 28 }
+            ]
+          },
+          {
+            title: 'Product Details',
+            items: [
+              { id: 101, name: 'Laptop', price: 50000 },
+              { id: 102, name: 'Mobile', price: 25000 }
+            ]
+          }
+        ]
+      }, null, 2);
+      j2cConvert();
+    }
+
+    function j2cOpenFile(inputEl) {
+      const file = inputEl.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.getElementById('j2c-input').value = reader.result;
+        j2cConvert();
+      };
+      reader.readAsText(file);
+      inputEl.value = '';
+    }
+
+    function j2cDownload() {
+      const csv = document.getElementById('j2c-output').value;
+      if (!csv) return;
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    /* =========================================================================
+       CSV → JSON
+       ========================================================================= */
+    function c2jParseCSV(text, delim) {
+      const rows = [];
+      let row = [];
+      let cell = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+        if (inQuotes) {
+          if (ch === '"' && next === '"') { cell += '"'; i++; }
+          else if (ch === '"') { inQuotes = false; }
+          else { cell += ch; }
+        } else {
+          if (ch === '"') { inQuotes = true; }
+          else if (ch === delim) { row.push(cell); cell = ''; }
+          else if (ch === '\r') { /* skip */ }
+          else if (ch === '\n') { row.push(cell); cell = ''; rows.push(row); row = []; }
+          else { cell += ch; }
+        }
+      }
+      // last cell / row
+      if (cell.length || row.length) { row.push(cell); rows.push(row); }
+      // drop completely empty trailing rows
+      while (rows.length && rows[rows.length - 1].every(c => c === '')) rows.pop();
+      return rows;
+    }
+
+    function c2jCoerce(val, parseNumbers) {
+      if (val === null || val === undefined) return '';
+      const s = String(val).trim();
+      if (!parseNumbers) return s;
+      if (s === '') return '';
+      if (/^true$/i.test(s)) return true;
+      if (/^false$/i.test(s)) return false;
+      if (/^null$/i.test(s)) return null;
+      // integer or float (no leading zeros unless 0 / 0.x)
+      if (/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(s)) {
+        const n = Number(s);
+        if (!isNaN(n) && isFinite(n)) return n;
+      }
+      return s;
+    }
+
+    function c2jConvert() {
+      const raw = document.getElementById('c2j-input').value;
+      const errBox = document.getElementById('c2j-error');
+      const errText = document.getElementById('c2j-error-text');
+      const badge = document.getElementById('c2j-status-badge');
+      const outEl = document.getElementById('c2j-output');
+      errBox.style.display = 'none';
+
+      if (!raw.trim()) {
+        outEl.value = '';
+        document.getElementById('c2j-stat-rows').textContent = '0';
+        document.getElementById('c2j-stat-cols').textContent = '0';
+        document.getElementById('c2j-stat-chars').textContent = '0';
+        badge.textContent = 'No input yet';
+        badge.className = 'badge';
+        return;
+      }
+
+      try {
+        let delim = document.getElementById('c2j-delim').value;
+        if (delim === '\\t') delim = '\t';
+        const hasHeader = document.getElementById('c2j-header').checked;
+        const parseNumbers = document.getElementById('c2j-parse-numbers').checked;
+        const shape = document.getElementById('c2j-shape').value;
+        const titleCol = (document.getElementById('c2j-title-col').value || 'title').trim();
+        const rootKey = (document.getElementById('c2j-root-key').value || 'data').trim() || 'data';
+
+        const matrix = c2jParseCSV(raw, delim);
+        if (!matrix.length) {
+          outEl.value = '[]';
+          badge.textContent = 'Empty';
+          badge.className = 'badge';
+          document.getElementById('c2j-stat-rows').textContent = '0';
+          document.getElementById('c2j-stat-cols').textContent = '0';
+          document.getElementById('c2j-stat-chars').textContent = '2';
+          return;
+        }
+
+        let headers;
+        let dataRows;
+        if (hasHeader) {
+          headers = matrix[0].map(h => String(h).trim() || 'col');
+          // uniquify duplicate headers
+          const seen = {};
+          headers = headers.map(h => {
+            if (seen[h] == null) { seen[h] = 0; return h; }
+            seen[h]++;
+            return h + '_' + seen[h];
+          });
+          dataRows = matrix.slice(1);
+        } else {
+          const maxCols = Math.max(...matrix.map(r => r.length));
+          headers = Array.from({ length: maxCols }, (_, i) => 'col' + (i + 1));
+          dataRows = matrix;
+        }
+
+        // Pad short rows
+        dataRows = dataRows.map(r => {
+          const copy = r.slice();
+          while (copy.length < headers.length) copy.push('');
+          return copy;
+        });
+
+        const objects = dataRows.map(r => {
+          const obj = {};
+          headers.forEach((h, i) => {
+            obj[h] = c2jCoerce(r[i], parseNumbers);
+          });
+          return obj;
+        });
+
+        let result;
+        if (shape === 'nested') {
+          // Group by title column → { [rootKey]: [ { title, items: [...] }, ... ] }
+          const titleKey = headers.includes(titleCol) ? titleCol : headers[0];
+          const order = [];
+          const groups = new Map();
+          objects.forEach(obj => {
+            const t = obj[titleKey];
+            const titleVal = (t === null || t === undefined || t === '') ? '' : String(t);
+            if (!groups.has(titleVal)) {
+              groups.set(titleVal, []);
+              order.push(titleVal);
+            }
+            const item = {};
+            Object.keys(obj).forEach(k => {
+              if (k !== titleKey) item[k] = obj[k];
+            });
+            groups.get(titleVal).push(item);
+          });
+          const sections = order.map(t => ({ title: t, items: groups.get(t) }));
+          result = {};
+          result[rootKey] = sections;
+        } else {
+          result = objects;
+        }
+
+        const json = JSON.stringify(result, null, 2);
+        outEl.value = json;
+        document.getElementById('c2j-stat-rows').textContent = dataRows.length.toLocaleString();
+        document.getElementById('c2j-stat-cols').textContent = headers.length.toLocaleString();
+        document.getElementById('c2j-stat-chars').textContent = json.length.toLocaleString();
+        badge.textContent = 'Converted';
+        badge.className = 'badge success';
+      } catch (e) {
+        errText.textContent = e.message || String(e);
+        errBox.style.display = 'grid';
+        outEl.value = '';
+        badge.textContent = 'Error';
+        badge.className = 'badge danger';
+        document.getElementById('c2j-stat-rows').textContent = '0';
+        document.getElementById('c2j-stat-cols').textContent = '0';
+        document.getElementById('c2j-stat-chars').textContent = '0';
+      }
+    }
+
+    function c2jClear() {
+      document.getElementById('c2j-input').value = '';
+      c2jConvert();
+    }
+
+    function c2jSample() {
+      document.getElementById('c2j-input').value =
+        'title,id,name,age,price\n' +
+        'User Details,1,John,25,\n' +
+        'User Details,2,Sarah,28,\n' +
+        'Product Details,101,Laptop,,50000\n' +
+        'Product Details,102,Mobile,,25000';
+      document.getElementById('c2j-shape').value = 'nested';
+      document.getElementById('c2j-title-col').value = 'title';
+      document.getElementById('c2j-root-key').value = 'data';
+      document.getElementById('c2j-header').checked = true;
+      document.getElementById('c2j-parse-numbers').checked = true;
+      c2jConvert();
+    }
+
+    function c2jOpenFile(inputEl) {
+      const file = inputEl.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.getElementById('c2j-input').value = reader.result;
+        c2jConvert();
+      };
+      reader.readAsText(file);
+      inputEl.value = '';
+    }
+
+    function c2jDownload() {
+      const json = document.getElementById('c2j-output').value;
+      if (!json) return;
+      const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     /* =========================================================================
